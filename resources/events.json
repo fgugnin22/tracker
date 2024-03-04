@@ -1,0 +1,101 @@
+[
+  {
+    "name": "Событие 1",
+    "date": "03.03.2024",
+    "actualStartsHour": null,
+    "actualStartsMinute": null,
+    "startsMinute": 0,
+    "endsMinute": 43,
+    "startsHour": 9,
+    "endsHour": 12,
+    "detail": "aognsidnfsinfsa"
+  },
+  {
+    "name": "Событие 2",
+    "date": "04.03.2024",
+    "actualStartsHour": null,
+    "actualStartsMinute": null,
+    "startsHour": 20,
+    "startsMinute": 0,
+    "endsHour": 23,
+    "endsMinute": 59,
+    "detail": "asdfasdfas"
+  },
+  {
+    "name": "Событие 3",
+    "date": "03.03.2024",
+    "actualStartsHour": null,
+    "actualStartsMinute": null,
+    "startsMinute": 0,
+    "endsMinute": 59,
+    "startsHour": 0,
+    "endsHour": 23,
+    "detail": "jtydjtyjty"
+  },
+  {
+    "name": "Событие 4",
+    "date": "05.03.2024",
+    "actualStartsHour": null,
+    "actualStartsMinute": null,
+    "startsMinute": 0,
+    "endsMinute": 43,
+    "startsHour": 9,
+    "endsHour": 12,
+    "detail": "aergerg8ea"
+  },
+  {
+    "name": "Событие 5",
+    "date": "05.03.2024",
+    "actualStartsHour": null,
+    "actualStartsMinute": null,
+    "startsMinute": 0,
+    "endsMinute": 43,
+    "startsHour": 14,
+    "endsHour": 18,
+    "detail": "aer7g89ea7gher"
+  },
+  {
+    "name": "Событие 6",
+    "date": "06.03.2024",
+    "actualStartsHour": 6,
+    "actualStartsMinute": 56,
+    "startsMinute": 0,
+    "endsMinute": 43,
+    "startsHour": 8,
+    "endsHour": 21,
+    "detail": "aerg9ayeg"
+  },
+  {
+    "actualStartsHour": null,
+    "actualStartsMinute": null,
+    "name": "aisudgfisd",
+    "date": "2.0.2",
+    "startsHour": 0,
+    "startsMinute": 12,
+    "endsHour": 0,
+    "endsMinute": 59,
+    "details": "alkdnflsdnflks"
+  },
+  {
+    "actualStartsHour": null,
+    "actualStartsMinute": null,
+    "name": "asdfasf",
+    "date": "05.03.2024",
+    "startsHour": 0,
+    "startsMinute": 33,
+    "endsHour": 0,
+    "endsMinute": 59,
+    "details": "a;kdmflksdnflaksf"
+  },
+  {
+    "actualStartsHour": null,
+    "actualStartsMinute": null,
+    "name": "asdfasfs",
+    "date": "05.03.2024",
+    "startsHour": 0,
+    "startsMinute": 33,
+    "endsHour": 1,
+    "endsMinute": 20,
+    "details": "aknlkfd"
+  }
+]

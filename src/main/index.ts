@@ -2,12 +2,13 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { readFileSync, writeFileSync } from 'fs'
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1920,
+    height: 1080,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -51,7 +52,28 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
-
+  ipcMain.handle('get_events', async () => {
+    try {
+      const fileContent = readFileSync(join(__dirname, '../../resources/events.json'), 'utf8')
+      const eventsData = JSON.parse(fileContent)
+      return { data: eventsData, isSuccess: true }
+    } catch (err) {
+      console.log(err)
+      return { data: null, isSuccess: false }
+    }
+  })
+  ipcMain.handle('save_events', async (_event, args: { payload: string }) => {
+    try {
+      writeFileSync(join(__dirname, '../../resources/events.json'), args.payload, {
+        encoding: 'utf8'
+      })
+      console.log(1)
+      return { isSuccess: true }
+    } catch (err) {
+      console.log(err, args)
+      return { isSuccess: false }
+    }
+  })
   createWindow()
 
   app.on('activate', function () {

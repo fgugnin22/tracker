@@ -1,4 +1,4 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
@@ -11,6 +11,11 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('electron', {
+      // blenderVersion: async (blenderPath) => ipcRenderer.invoke('blender:version', blenderPath),
+      getEvents: async () => ipcRenderer.invoke('get_events'),
+      saveEvents: async (payload: string) => ipcRenderer.invoke('get_events', { payload })
+    })
   } catch (error) {
     console.error(error)
   }
