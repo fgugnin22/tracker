@@ -9,8 +9,8 @@ function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
-    show: false,
-    autoHideMenuBar: true,
+    show: true,
+    autoHideMenuBar: false,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -35,7 +35,17 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
-
+export type EventType = {
+  name: string
+  date: string
+  startsHour: number
+  startsMinute: number
+  endsHour: number
+  endsMinute: number
+  detail: string
+  actualStartsHour: number | null
+  actualStartsMinute: number | null
+}
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -67,7 +77,27 @@ app.whenReady().then(() => {
       writeFileSync(join(__dirname, '../../resources/events.json'), args.payload, {
         encoding: 'utf8'
       })
-      console.log(1)
+      return { isSuccess: true }
+    } catch (err) {
+      console.log(err, args)
+      return { isSuccess: false }
+    }
+  })
+  ipcMain.handle('start_event', async (_event, args: { eventData: EventType }) => {
+    try {
+      const fileContent = readFileSync(join(__dirname, '../../resources/events.json'), 'utf8')
+      const eventsData: EventType[] = JSON.parse(fileContent)
+      eventsData[
+        eventsData.findIndex(
+          (ev) =>
+            ev.date === args.eventData.date &&
+            ev.name === args.eventData.name &&
+            ev.detail === args.eventData.detail
+        )
+      ] = args.eventData
+      writeFileSync(join(__dirname, '../../resources/events.json'), JSON.stringify(eventsData), {
+        encoding: 'utf8'
+      })
       return { isSuccess: true }
     } catch (err) {
       console.log(err, args)

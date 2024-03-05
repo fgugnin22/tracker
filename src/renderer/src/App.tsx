@@ -48,12 +48,13 @@ export type EventType = {
   startsMinute: number
   endsHour: number
   endsMinute: number
-  detail: string
+  details: string
   actualStartsHour: number | null
   actualStartsMinute: number | null
 }
 type EventsRes = { data: EventType[]; isSuccess: boolean }
 function App(): JSX.Element {
+  const windowObj: Window & { appRerender?: boolean } = window
   const [date, setDate] = useState(new Date())
   const [now, setNow] = useState(new Date())
   const [events, setEvents] = useState<EventsRes>({
@@ -69,7 +70,7 @@ function App(): JSX.Element {
   useEffect(() => {
     const id = setInterval(() => {
       setNow(new Date())
-    }, 30000)
+    }, 10000)
     try {
       window.electron.ipcRenderer.invoke('get_events').then((data: EventsRes) => setEvents(data))
     } catch (error) {
@@ -77,8 +78,16 @@ function App(): JSX.Element {
     }
     return () => clearInterval(id)
   }, [])
+  useEffect(() => {
+    window.electron.ipcRenderer.invoke('get_events').then((data: EventsRes) => setEvents(data))
+  }, [windowObj.appRerender])
+
   const handleSaveClick = async (): Promise<undefined> => {
     const form = document.querySelector('form') as HTMLFormElement
+    if (!form.reportValidity()) {
+      form.reportValidity
+      return
+    }
     const formData = new FormData(form)
     const body: EventType = events[0] ?? {}
     body.actualStartsHour = null
@@ -98,20 +107,18 @@ function App(): JSX.Element {
     await window.electron.ipcRenderer.invoke('save_events', {
       payload: JSON.stringify(newEventsData)
     })
+
     try {
-      console.log(
-        await window.electron.ipcRenderer
-          .invoke('get_events')
-          .then((data: EventsRes) => setEvents(data))
-      )
+      await window.electron.ipcRenderer
+        .invoke('get_events')
+        .then((data: EventsRes) => setEvents(data))
     } catch (error) {
       console.log(error)
     }
     setIsFormVisible(false)
   }
-  console.log(events)
   return (
-    <div className=" flex min-h-screen border border-t-black">
+    <div className=" flex min-h-screen border border-t-black ">
       <div
         className="min-w-[512px] max-w-[512px] border border-r-black
                       flex flex-col items-start justify-start py-14 px-10"
@@ -139,23 +146,38 @@ function App(): JSX.Element {
               <label className="mt-[2px]" htmlFor="">
                 Название:{' '}
               </label>
-              <input name="name" className="border rounded-[10px] p-[5px] text-base" type="text" />
+              <input
+                required
+                name="name"
+                className="border rounded-[10px] p-[5px] text-base"
+                type="text"
+                placeholder="Название"
+              />
             </div>
             <div className="flex gap-2 justify-between items-start">
               <label className="mt-[2px]" htmlFor="">
                 Дата:{' '}
               </label>
-              <input name="date" className="border rounded-[10px] p-[5px] text-base" type="date" />
+              <input
+                required
+                defaultValue={`${date.getFullYear()}-${date.getMonth() + 1 > 9 ? date.getMonth() + 1 : `0${date.getMonth() + 1}`}-${date.getDate() > 9 ? date.getDate() : `0${date.getDate()}`}`}
+                name="date"
+                className="border rounded-[10px] p-[5px] text-base"
+                type="date"
+              />
             </div>
             <div className="flex gap-2 justify-between items-start">
               <label className="mt-[2px]" htmlFor="timeFrom">
                 Начинается в:
               </label>
               <input
+                required
                 name="starts"
                 className="border rounded-[10px] p-[5px] text-base"
                 type="text"
                 id="timeFrom"
+                placeholder="09:00"
+                pattern="[0-9]{2}:[0-9]{2}"
               />
             </div>
             <div className="flex gap-2 justify-between items-start">
@@ -163,10 +185,13 @@ function App(): JSX.Element {
                 Заканчивается в
               </label>
               <input
+                required
                 name="ends"
                 className="border rounded-[10px] p-[5px] text-base"
                 type="text"
                 id="timeTo"
+                placeholder="23:59"
+                pattern="[0-9]{2}:[0-9]{2}"
               />
             </div>
             <div className="flex gap-2 justify-between items-start">
@@ -175,7 +200,7 @@ function App(): JSX.Element {
               </label>
               <textarea
                 name="details"
-                className="border rounded-[10px] p-[5px] text-base"
+                className="border rounded-[10px] p-[5px] text-base grow"
                 id="details"
               />
             </div>
@@ -189,9 +214,9 @@ function App(): JSX.Element {
           </form>
         )}
       </div>
-      <div className="overflow-y-scroll relative">
-        <div className="flex h-[105px] relative">
-          <div className="h-full min-w-[352px] max-w-[352px] bg-white border-r border-r-black border-b border-b-black sticky left-0"></div>
+      <div className="overflow-y-scroll max-h-[99.5vh] relative">
+        <div className="flex h-[105px]">
+          <div className="h-[105px] left-[513px] w-[352px] bg-white border-r border-r-black border-b border-b-black fixed"></div>
           <div className="h-full flex items-center border-b border-b-black pr-[40px]">
             {Array(25)
               .fill(1)
@@ -207,14 +232,7 @@ function App(): JSX.Element {
               })}
           </div>
         </div>
-        {date.toDateString() === now.toDateString() && (
-          <div
-            className="absolute w-[2px] bg-upcoming h-full top-0 -z-10"
-            style={{
-              left: `${38 + 352 + now.getHours() * 87 + Math.floor((now.getMinutes() * 87) / 60)}px`
-            }}
-          ></div>
-        )}
+
         {events.isSuccess &&
           events.data
             .filter((ev) => {
@@ -238,6 +256,14 @@ function App(): JSX.Element {
                 />
               )
             })}
+        {date.toDateString() === now.toDateString() && (
+          <div
+            className="absolute w-[2px] bg-upcoming h-full top-0 -z-10"
+            style={{
+              left: `${38 + 352 + now.getHours() * 87 + Math.floor((now.getMinutes() * 87) / 60)}px`
+            }}
+          ></div>
+        )}
       </div>
     </div>
   )
