@@ -26,5 +26,33 @@
     "endsHour": 17,
     "detail": "aognsidnfsinfsa",
     "details": "afsdfsdf"
+  },
+  {
+    "name": "gsdfgsdfgds",
+    "date": "11.03.2024",
+    "actualStartsHour": 17,
+    "actualStartsMinute": 34,
+    "actualEndsHour": 18,
+    "actualEndsMinute": 4,
+    "startsMinute": 45,
+    "endsMinute": 15,
+    "startsHour": 17,
+    "endsHour": 18,
+    "detail": "aognsidnfsinfsa",
+    "details": "asdfasdfasdf"
+  },
+  {
+    "name": "sadfasdfasdf",
+    "date": "11.03.2024",
+    "actualStartsHour": 17,
+    "actualStartsMinute": 58,
+    "actualEndsHour": 18,
+    "actualEndsMinute": 8,
+    "startsMinute": 12,
+    "endsMinute": 22,
+    "startsHour": 18,
+    "endsHour": 18,
+    "detail": "aognsidnfsinfsa",
+    "details": "asdfajsdbfasd\n"
   }
 ]

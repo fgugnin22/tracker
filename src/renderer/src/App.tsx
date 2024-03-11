@@ -62,6 +62,7 @@ function App(): JSX.Element {
   const [date, setDate] = useState(new Date())
   const [now, setNow] = useState(new Date())
   const [isFormVisible, setIsFormVisible] = useState(false)
+  const [customError, setCustomError] = useState('')
   const dateStr = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
   const handleChange = (selectedDate: Date): void => {
     setDate(selectedDate)
@@ -69,23 +70,22 @@ function App(): JSX.Element {
   useEffect(() => {
     const id = setInterval(() => {
       setNow(new Date())
-    }, 1000)
+    }, 5000)
+    dispatch(getEvents())
     return () => clearInterval(id)
   }, [])
-  useEffect(() => {
-    dispatch(getEvents())
-  }, [now])
 
   const handleSaveClick = async (): Promise<undefined> => {
     const form = document.querySelector('form') as HTMLFormElement
     if (!form.reportValidity()) {
-      form.reportValidity
       return
     }
     const formData = new FormData(form)
     const body: EventType = (state.events.data[0] && { ...state.events.data[0] }) ?? {}
     body.actualStartsHour = null
     body.actualStartsMinute = null
+    body.actualEndsHour = null
+    body.actualEndsMinute = null
     for (const [key, value] of formData.entries()) {
       if (key === 'starts' || key === 'ends') {
         body[key + 'Hour'] = Number(String(value).split(':')[0])
@@ -96,6 +96,14 @@ function App(): JSX.Element {
       } else {
         body[key] = value
       }
+    }
+    if (
+      body.endsHour < body.startsHour ||
+      (body.endsHour === body.startsHour && body.endsMinute <= body.startsMinute)
+    ) {
+      setCustomError('Начало должно быть раньше конца!')
+      setTimeout(() => setCustomError(''), 3000)
+      return
     }
     const events = [...state.events.data]
     events.push(body)
@@ -202,7 +210,7 @@ function App(): JSX.Element {
               type="button"
               onClick={handleSaveClick}
             >
-              Сохранить
+              {customError.length > 0 ? customError : 'Сохранить'}
             </button>
           </form>
         )}

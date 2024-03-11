@@ -28,17 +28,18 @@ const EventComponent = ({
       (now.getMinutes() + (eventModified.endsMinute - eventModified.startsMinute)) % 60
     await dispatch(startEvent({ eventData: eventModified }))
   }
+  const actualStartsHour = eventData.actualStartsHour ?? eventData.startsHour
+  const actualEndsHour = eventData.actualEndsHour ?? eventData.endsHour
+  const actualStartsMinute = eventData.actualStartsMinute ?? eventData.startsMinute
+  const actualEndsMinute = eventData.actualEndsMinute ?? eventData.endsMinute
   const isEndsInPast =
-    (eventData.actualStartsHour === null
-      ? eventData.endsHour < now.getHours() ||
-        (eventData.endsHour === now.getHours() && eventData.endsMinute <= now.getMinutes())
-      : eventData.actualEndsHour! < now.getHours() ||
-        (eventData.actualEndsHour === now.getHours() &&
-          eventData.actualEndsMinute! <= now.getMinutes())) || timeCoef === -1
+    timeCoef === -1 ||
+    actualEndsHour < now.getHours() ||
+    (actualEndsHour === now.getHours() && actualEndsMinute <= now.getMinutes())
   const isStartInFuture =
-    (eventData.actualStartsHour === null && eventData.startsHour > now.getHours()) ||
-    (eventData.startsHour === now.getHours() && eventData.startsMinute >= now.getMinutes()) ||
-    timeCoef === 1
+    timeCoef === 1 ||
+    actualStartsHour > now.getHours() ||
+    (actualStartsHour === now.getHours() && actualStartsMinute > now.getMinutes())
   const handleShowDialog = (): void => {
     dispatch(openModal(eventData))
   }
@@ -81,9 +82,7 @@ const EventComponent = ({
         <p
           className={
             `text-right ml-auto mr-[9px] font-bold text-xl ` +
-            ((timeCoef === -1 && ' text-main') ||
-              (timeCoef === 1 && ' text-upcoming') ||
-              (isEndsInPast && ' text-main') ||
+            ((isEndsInPast && ' text-main') ||
               (isStartInFuture && ' text-upcoming') ||
               ' text-neutral')
           }
