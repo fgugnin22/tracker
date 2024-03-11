@@ -216,8 +216,8 @@ function App(): JSX.Element {
       </div>
       <div className="overflow-y-scroll max-h-[99.5vh] relative">
         <div className="flex h-[105px]">
-          <div className="h-[105px] left-[513px] w-[352px] bg-white border-r border-r-black border-b border-b-black fixed"></div>
-          <div className="h-full flex items-center border-b border-b-black pr-[40px]">
+          <div className="h-[105px] left-[513px] w-[352px] bg-white border-r border-r-black border-b border-b-black fixed z-10"></div>
+          <div className="h-full flex items-center border-b border-b-black pr-[40px] relative left-[352px] z-0">
             {Array(25)
               .fill(1)
               .map((_v, i) => {

@@ -11,7 +11,8 @@ const EventComponent = ({
   const id = useId()
   const windowObj: Window & { appRerender?: boolean } = window
   const now = new Date()
-  const handleStartButton = async (): Promise<void> => {
+  const handleStartButton = async (event: React.MouseEvent): Promise<void> => {
+    event.stopPropagation()
     const eventModified = { ...eventData }
     const now = new Date()
     eventModified.actualStartsHour = now.getHours()
