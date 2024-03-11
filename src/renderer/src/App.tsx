@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import Datepicker from 'tailwind-datepicker-react'
-import EventComponent from './EventComponent'
+import EventComponent from './components/EventComponent'
+import { useAppDispatch, useAppSelector } from './store'
+import { addEvent, closeModal, getEvents } from './store/actions'
 const months = [
   'Январь',
   'Февраль',
@@ -51,36 +53,28 @@ export type EventType = {
   details: string
   actualStartsHour: number | null
   actualStartsMinute: number | null
+  actualEndsHour: number | null
+  actualEndsMinute: number | null
 }
-type EventsRes = { data: EventType[]; isSuccess: boolean }
 function App(): JSX.Element {
-  const windowObj: Window & { appRerender?: boolean } = window
+  const dispatch = useAppDispatch()
+  const state = useAppSelector((state) => state.main)
   const [date, setDate] = useState(new Date())
   const [now, setNow] = useState(new Date())
-  const [events, setEvents] = useState<EventsRes>({
-    data: [],
-    isSuccess: false
-  })
   const [isFormVisible, setIsFormVisible] = useState(false)
   const dateStr = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
-  const show = true
   const handleChange = (selectedDate: Date): void => {
     setDate(selectedDate)
   }
   useEffect(() => {
     const id = setInterval(() => {
       setNow(new Date())
-    }, 10000)
-    try {
-      window.electron.ipcRenderer.invoke('get_events').then((data: EventsRes) => setEvents(data))
-    } catch (error) {
-      console.log(error)
-    }
+    }, 1000)
     return () => clearInterval(id)
   }, [])
   useEffect(() => {
-    window.electron.ipcRenderer.invoke('get_events').then((data: EventsRes) => setEvents(data))
-  }, [windowObj.appRerender])
+    dispatch(getEvents())
+  }, [now])
 
   const handleSaveClick = async (): Promise<undefined> => {
     const form = document.querySelector('form') as HTMLFormElement
@@ -89,7 +83,7 @@ function App(): JSX.Element {
       return
     }
     const formData = new FormData(form)
-    const body: EventType = events[0] ?? {}
+    const body: EventType = (state.events.data[0] && { ...state.events.data[0] }) ?? {}
     body.actualStartsHour = null
     body.actualStartsMinute = null
     for (const [key, value] of formData.entries()) {
@@ -103,20 +97,19 @@ function App(): JSX.Element {
         body[key] = value
       }
     }
-    const newEventsData = [...events.data, body]
-    await window.electron.ipcRenderer.invoke('save_events', {
-      payload: JSON.stringify(newEventsData)
-    })
-
-    try {
-      await window.electron.ipcRenderer
-        .invoke('get_events')
-        .then((data: EventsRes) => setEvents(data))
-    } catch (error) {
-      console.log(error)
-    }
+    const events = [...state.events.data]
+    events.push(body)
+    await dispatch(addEvent(events))
     setIsFormVisible(false)
   }
+  const actualStartsHour =
+    state.modalState.details?.actualStartsHour ?? state.modalState.details?.startsHour ?? -1
+  const actualEndsHour =
+    state.modalState.details?.actualEndsHour ?? state.modalState.details?.endsHour ?? -1
+  const actualStartsMinute =
+    state.modalState.details?.actualStartsMinute ?? state.modalState.details?.startsMinute ?? -1
+  const actualEndsMinute =
+    state.modalState.details?.actualEndsMinute ?? state.modalState.details?.endsMinute ?? -1
   return (
     <div className=" flex min-h-screen border border-t-black ">
       <div
@@ -130,7 +123,7 @@ function App(): JSX.Element {
             classNames=""
             options={options}
             onChange={handleChange}
-            show={show}
+            show={true}
             setShow={() => true}
           />
           <button
@@ -233,8 +226,9 @@ function App(): JSX.Element {
           </div>
         </div>
 
-        {events.isSuccess &&
-          events.data
+        {state.events.isSuccess &&
+          state.events.data &&
+          state.events.data
             .filter((ev) => {
               return (
                 ev.date ===
@@ -256,6 +250,40 @@ function App(): JSX.Element {
                 />
               )
             })}
+        <dialog
+          open={state.modalState.isOpen}
+          className="w-96 min-h-96 pl-4 pt-2 pb-3 rounded-[10px] shadow-md shadow-gray-100
+         fixed left-[890px] top-[120px] ml-1 mt-1 z-50 bg-white border border-black open:flex flex-col gap-2"
+        >
+          <p className="text-xl max-w-72 break-words">
+            <span className="font-semibold">Название:</span> {state.modalState.details?.name}
+          </p>
+          <p className="text-xl max-w-72 break-words">
+            {' '}
+            <span className="font-semibold">Дата:</span> {state.modalState.details?.date}
+          </p>
+          <p className="text-xl max-w-72 break-words">
+            <span className="font-semibold">Начало:</span>{' '}
+            {`${actualStartsHour > 9 ? actualStartsHour : `0${actualStartsHour}`}:${
+              actualStartsMinute > 9 ? actualStartsMinute : `0${actualStartsMinute}`
+            }`}
+          </p>
+          <p className="text-xl max-w-72 break-words">
+            <span className="font-semibold">Конец:</span>{' '}
+            {`${actualEndsHour > 9 ? actualEndsHour : `0${actualEndsHour}`}:${
+              actualEndsMinute > 9 ? actualEndsMinute : `0${actualEndsMinute}`
+            }`}
+          </p>
+          <p className="text-xl max-w-[352px] break-words">
+            <span className="font-semibold">Описание:</span> {state.modalState.details?.details}
+          </p>
+          <button
+            className="text-3xl absolute top-2 right-2 rotate-45 w-10 h-10 hover:bg-slate-300 rounded-full flex items-center justify-center transition border"
+            onClick={() => dispatch(closeModal())}
+          >
+            +
+          </button>
+        </dialog>
         {date.toDateString() === now.toDateString() && (
           <div
             className="absolute w-[2px] bg-upcoming h-full top-0 -z-10"

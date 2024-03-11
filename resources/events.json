@@ -1,1 +1,30 @@
-[{"name":"Событие 1","date":"03.03.2024","actualStartsHour":null,"actualStartsMinute":null,"startsMinute":0,"endsMinute":43,"startsHour":9,"endsHour":12,"detail":"aognsidnfsinfsa"},{"name":"Событие 2","date":"04.03.2024","actualStartsHour":null,"actualStartsMinute":null,"startsHour":20,"startsMinute":0,"endsHour":23,"endsMinute":59,"detail":"asdfasdfas"},{"name":"Событие 3","date":"03.03.2024","actualStartsHour":null,"actualStartsMinute":null,"startsMinute":0,"endsMinute":59,"startsHour":0,"endsHour":23,"detail":"jtydjtyjty"},{"name":"Событие 4","date":"05.03.2024","actualStartsHour":null,"actualStartsMinute":null,"startsMinute":0,"endsMinute":43,"startsHour":9,"endsHour":12,"detail":"aergerg8ea"},{"name":"Событие 5","date":"05.03.2024","actualStartsHour":null,"actualStartsMinute":null,"startsMinute":0,"endsMinute":43,"startsHour":14,"endsHour":18,"detail":"aer7g89ea7gher"},{"name":"Событие 6","date":"06.03.2024","actualStartsHour":6,"actualStartsMinute":56,"startsMinute":0,"endsMinute":43,"startsHour":8,"endsHour":21,"detail":"aerg9ayeg"},{"actualStartsHour":null,"actualStartsMinute":null,"name":"aisudgfisd","date":"2.0.2","startsHour":0,"startsMinute":12,"endsHour":0,"endsMinute":59,"details":"alkdnflsdnflks"},{"actualStartsHour":null,"actualStartsMinute":null,"name":"asdfasf","date":"05.03.2024","startsHour":0,"startsMinute":33,"endsHour":0,"endsMinute":59,"details":"a;kdmflksdnflaksf"},{"actualStartsHour":null,"actualStartsMinute":null,"name":"asdfasfs","date":"05.03.2024","startsHour":0,"startsMinute":33,"endsHour":1,"endsMinute":20,"details":"aknlkfd"},{"actualStartsHour":19,"actualStartsMinute":1,"name":"Негры пид","date":"05.03.2024","startsHour":19,"startsMinute":12,"endsHour":19,"endsMinute":58,"details":"alsdfmalskdfmlaksdmflasdkmflasdkfmkalsdmfla"},{"actualStartsHour":null,"actualStartsMinute":null,"name":"","date":"undefined.undefined.","startsHour":0,"startsMinute":null,"endsHour":0,"endsMinute":null,"details":""},{"actualStartsHour":null,"actualStartsMinute":null,"name":"","date":"undefined.undefined.","startsHour":0,"startsMinute":null,"endsHour":0,"endsMinute":null,"details":""},{"actualStartsHour":null,"actualStartsMinute":null,"name":"fasdfasdf","date":"05.03.2024","startsHour":0,"startsMinute":12,"endsHour":12,"endsMinute":19,"details":"fasdfasdf"},{"actualStartsHour":null,"actualStartsMinute":null,"name":"8adfasdfasdfasdfasdfasdfasdfasdfasdfdfasd","date":"05.03.2024","startsHour":12,"startsMinute":12,"endsHour":13,"endsMinute":13,"details":""},{"actualStartsHour":null,"actualStartsMinute":null,"name":"fksadfbk asdkfjas asdfsdfa asdfasdf asdfas","date":"05.03.2024","startsHour":9,"startsMinute":0,"endsHour":23,"endsMinute":59,"details":""},{"actualStartsHour":null,"actualStartsMinute":null,"name":"sdfasfasdf asdffffffffff asdffasd asdf asdfasdfasd ","date":"05.03.2024","startsHour":9,"startsMinute":12,"endsHour":22,"endsMinute":12,"details":"alsdjbfnaksdbfkasdjbfkalsjdfbaksljdfbaskdf asldkfnasldn jasd fsa uuuuuuuuuuuuuuuuuubdsuuuufu uukasujuuudbu ufuukujuasubuu uuu bkjfas"},{"actualStartsHour":null,"actualStartsMinute":null,"name":"asdfasdf","date":"05.03.2024","startsHour":0,"startsMinute":0,"endsHour":0,"endsMinute":8,"details":""},{"actualStartsHour":8,"actualStartsMinute":18,"name":"Проектная деятельность","date":"11.03.2024","startsHour":9,"startsMinute":30,"endsHour":10,"endsMinute":40,"details":"ПД"},{"actualStartsHour":8,"actualStartsMinute":19,"name":"больше пд","date":"11.03.2024","startsHour":9,"startsMinute":30,"endsHour":10,"endsMinute":41,"details":"afdfasdfas"}]
+[
+  {
+    "name": "asdfasdfasdf",
+    "date": "11.03.2024",
+    "actualStartsHour": 16,
+    "actualStartsMinute": 58,
+    "actualEndsHour": 17,
+    "actualEndsMinute": 13,
+    "startsMinute": 15,
+    "endsMinute": 30,
+    "startsHour": 17,
+    "endsHour": 17,
+    "detail": "aognsidnfsinfsa",
+    "details": ""
+  },
+  {
+    "name": "gfgsdfgsd",
+    "date": "11.03.2024",
+    "actualStartsHour": 16,
+    "actualStartsMinute": 59,
+    "actualEndsHour": 17,
+    "actualEndsMinute": 29,
+    "startsMinute": 15,
+    "endsMinute": 45,
+    "startsHour": 17,
+    "endsHour": 17,
+    "detail": "aognsidnfsinfsa",
+    "details": "afsdfsdf"
+  }
+]
