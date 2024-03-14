@@ -13,9 +13,27 @@ type EventExport = {
   длительность: string
   описание: string
 }
+const sortEvents = (events: EventType[]): EventType[] => {
+  return events.toSorted((a, b) => {
+    const yearA = Number(a.date.slice(6, undefined))
+    const yearB = Number(b.date.slice(6, undefined))
+    if (yearA !== yearB) {
+      return yearA - yearB
+    }
 
+    const monthA = Number(a.date.slice(3, 5))
+    const monthB = Number(b.date.slice(3, 5))
+    if (monthA !== monthB) {
+      return monthA - monthB
+    }
+
+    const dayA = Number(a.date.slice(0, 2))
+    const dayB = Number(b.date.slice(0, 2))
+    return dayA - dayB
+  })
+}
 const transformEvents = (events: EventType[]): EventExport[] => {
-  return events.map((ev) => {
+  return sortEvents(events).map((ev) => {
     const durationInMinutes = (ev.endsHour - ev.startsHour) * 60 + (ev.endsMinute - ev.startsMinute)
     const evExport = {
       название: ev.name,
