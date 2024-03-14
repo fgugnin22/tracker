@@ -3,6 +3,38 @@ import Datepicker from 'tailwind-datepicker-react'
 import EventComponent from './components/EventComponent'
 import { useAppDispatch, useAppSelector } from './store'
 import { addEvent, closeModal, getEvents } from './store/actions'
+import xlsx, { IJsonSheet, ISettings } from 'json-as-xlsx'
+
+type EventExport = {
+  название: string
+  дата: string
+  начало: string
+  конец: string
+  длительность: string
+  описание: string
+}
+
+const transformEvents = (events: EventType[]): EventExport[] => {
+  return events.map((ev) => {
+    const durationInMinutes = (ev.endsHour - ev.startsHour) * 60 + (ev.endsMinute - ev.startsMinute)
+    const evExport = {
+      название: ev.name,
+      дата: ev.date,
+      начало:
+        ev.actualStartsHour !== null
+          ? `${ev.actualStartsHour}:${ev.actualStartsMinute}`
+          : `${ev.startsHour}:${ev.startsMinute}`,
+      конец:
+        ev.actualEndsHour !== null
+          ? `${ev.actualEndsHour}:${ev.actualEndsMinute}`
+          : `${ev.endsHour}:${ev.endsMinute}`,
+      длительность: `${Math.floor(durationInMinutes / 60)} часов, ${durationInMinutes % 60} минут`,
+      описание: ev.details
+    }
+    return evExport
+  })
+}
+
 const months = [
   'Январь',
   'Февраль',
@@ -110,6 +142,27 @@ function App(): JSX.Element {
     await dispatch(addEvent(events))
     setIsFormVisible(false)
   }
+
+  const handleExportButtonClick = (): void => {
+    const sheet: IJsonSheet = {
+      columns: [
+        { label: 'Название', value: 'название' },
+        { label: 'Дата', value: 'дата', format: '# "date"' },
+        { label: 'Начало', value: 'начало', format: '# "time"' },
+        { label: 'Конец', value: 'конец', format: '# "time"' },
+        { label: 'Длительность', value: 'длительность' },
+        { label: 'Описание', value: 'описание' }
+      ],
+      content: transformEvents(state.events.data)
+    }
+
+    const settings: ISettings = {
+      fileName: 'События',
+      writeOptions: { type: 'file' }
+    }
+    xlsx([sheet], settings)
+  }
+
   const actualStartsHour =
     state.modalState.details?.actualStartsHour ?? state.modalState.details?.startsHour ?? -1
   const actualEndsHour =
@@ -136,12 +189,13 @@ function App(): JSX.Element {
           />
           <button
             className=" bg-main hover:bg-indigo-400 transition py-3 grow rounded-[10px] text-lg font-semibold text-white"
-            onClick={() => setIsFormVisible(true)}
+            onClick={() => setIsFormVisible((p) => !p)}
           >
-            +Добавить
+            {isFormVisible ? 'Скрыть' : '+Добавить'}
           </button>
         </div>
-        {isFormVisible && (
+
+        {isFormVisible ? (
           <form className="flex flex-col gap-2 w-full mt-8 text-lg font-medium">
             <div className="flex gap-2 justify-between items-start">
               <label className="mt-[2px]" htmlFor="">
@@ -213,6 +267,13 @@ function App(): JSX.Element {
               {customError.length > 0 ? customError : 'Сохранить'}
             </button>
           </form>
+        ) : (
+          <button
+            className=" bg-green-600 hover:bg-green-700 transition py-3 w-full mt-auto rounded-[10px] text-lg font-semibold text-white"
+            onClick={handleExportButtonClick}
+          >
+            Экспорт
+          </button>
         )}
       </div>
       <div className="overflow-y-scroll max-h-[99.5vh] relative">

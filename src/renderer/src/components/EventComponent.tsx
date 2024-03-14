@@ -28,18 +28,21 @@ const EventComponent = ({
       (now.getMinutes() + (eventModified.endsMinute - eventModified.startsMinute)) % 60
     await dispatch(startEvent({ eventData: eventModified }))
   }
+
   const actualStartsHour = eventData.actualStartsHour ?? eventData.startsHour
   const actualEndsHour = eventData.actualEndsHour ?? eventData.endsHour
   const actualStartsMinute = eventData.actualStartsMinute ?? eventData.startsMinute
   const actualEndsMinute = eventData.actualEndsMinute ?? eventData.endsMinute
   const isEndsInPast =
-    timeCoef === -1 ||
-    actualEndsHour < now.getHours() ||
-    (actualEndsHour === now.getHours() && actualEndsMinute <= now.getMinutes())
+    timeCoef !== 1 &&
+    (timeCoef === -1 ||
+      actualEndsHour < now.getHours() ||
+      (actualEndsHour === now.getHours() && actualEndsMinute <= now.getMinutes()))
   const isStartInFuture =
-    timeCoef === 1 ||
-    actualStartsHour > now.getHours() ||
-    (actualStartsHour === now.getHours() && actualStartsMinute > now.getMinutes())
+    timeCoef !== -1 &&
+    (timeCoef === 1 ||
+      actualStartsHour > now.getHours() ||
+      (actualStartsHour === now.getHours() && actualStartsMinute > now.getMinutes()))
   const handleShowDialog = (): void => {
     dispatch(openModal(eventData))
   }
