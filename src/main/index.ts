@@ -65,7 +65,12 @@ app.whenReady().then(() => {
   ipcMain.handle('get_events', async () => {
     try {
       const fileContent = readFileSync(join(__dirname, '../../resources/events.json'), 'utf8')
-      const eventsData = JSON.parse(fileContent)
+      let eventsData: EventType[] = []
+      try {
+        eventsData = JSON.parse(fileContent)
+      } catch (err) {
+        eventsData = []
+      }
       return { data: eventsData, isSuccess: true }
     } catch (err) {
       console.log(err)
