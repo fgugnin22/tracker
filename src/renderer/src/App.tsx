@@ -13,6 +13,7 @@ type EventExport = {
   длительность: string
   описание: string
 }
+
 const sortEvents = (events: EventType[]): EventType[] => {
   return events.toSorted((a, b) => {
     const yearA = Number(a.date.slice(6, undefined))
@@ -32,6 +33,7 @@ const sortEvents = (events: EventType[]): EventType[] => {
     return dayA - dayB
   })
 }
+
 const transformEvents = (events: EventType[]): EventExport[] => {
   return sortEvents(events).map((ev) => {
     const durationInMinutes = (ev.endsHour - ev.startsHour) * 60 + (ev.endsMinute - ev.startsMinute)
@@ -255,7 +257,7 @@ function App(): JSX.Element {
             </div>
             <div className="flex gap-2 justify-between items-start">
               <label className="mt-[2px]" htmlFor="timeTo">
-                Заканчивается в
+                Заканчивается в:
               </label>
               <input
                 required
@@ -269,7 +271,7 @@ function App(): JSX.Element {
             </div>
             <div className="flex gap-2 justify-between items-start">
               <label className="mt-[2px]" htmlFor="details">
-                Описание
+                Описание:
               </label>
               <textarea
                 name="details"
@@ -286,12 +288,18 @@ function App(): JSX.Element {
             </button>
           </form>
         ) : (
-          <button
-            className=" bg-green-600 hover:bg-green-700 transition py-3 w-full mt-auto rounded-[10px] text-lg font-semibold text-white"
-            onClick={handleExportButtonClick}
-          >
-            Экспорт
-          </button>
+          <div className=" w-full flex flex-col gap-4 grow pt-4">
+            <p className=" text-[20px]">
+              Нажатие на кнопку рядом с событием в таблице запускает событие мгновенно с текущим
+              временем, не меняя его продолжительность!
+            </p>
+            <button
+              className=" bg-green-600 hover:bg-green-700 transition py-3 w-full rounded-[10px] text-lg font-semibold text-white mt-auto"
+              onClick={handleExportButtonClick}
+            >
+              Экспорт
+            </button>
+          </div>
         )}
       </div>
       <div className="overflow-y-scroll max-h-[99.5vh] relative">
