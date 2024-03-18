@@ -52,7 +52,7 @@ const EventComponent = ({
         onClick={handleShowDialog}
         className="flex items-center w-[352px] h-full border-r border-black sticky left-0 bg-white z-10 hover:bg-slate-200 transition"
       >
-        {isStartInFuture && !state.eventState.loading ? (
+        {isStartInFuture && timeCoef === 0 && !state.eventState.loading ? (
           <button onClick={handleStartButton} className="absolute left-5 top-[38px]">
             <svg width="20" height="33" viewBox="0 0 20 33" fill="none">
               <path d="M0 33V0L19.5 16.5L0 33Z" fill="#4E4E4E" />
