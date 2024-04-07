@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Datepicker from 'tailwind-datepicker-react'
 import EventComponent from './components/EventComponent'
 import { useAppDispatch, useAppSelector } from './store'
-import { addEvent, closeModal, getEvents } from './store/actions'
+import { addEvent, closeModal, deleteEvent, getEvents } from './store/actions'
 import xlsx, { IJsonSheet, ISettings } from 'json-as-xlsx'
 
 type EventExport = {
@@ -377,6 +377,31 @@ function App(): JSX.Element {
             onClick={() => dispatch(closeModal())}
           >
             +
+          </button>
+          <button
+            onClick={async (e) => {
+              ;(e.target as HTMLButtonElement).disabled = true
+              const ev = state.events.data.find(
+                (e) =>
+                  e.name === state.modalState.details?.name &&
+                  e.details === state.modalState.details?.details &&
+                  e.date === state.modalState.details?.date &&
+                  e.startsHour === state.modalState.details?.startsHour &&
+                  e.startsMinute === state.modalState.details?.startsMinute
+              )
+
+              if (!ev) {
+                ;(e.target as HTMLButtonElement).disabled = false
+                return
+              }
+
+              await dispatch(deleteEvent({ eventData: ev }))
+              ;(e.target as HTMLButtonElement).disabled = false
+              dispatch(closeModal())
+            }}
+            className="mt-auto p-3 rounded-[10px] bg-red-500 mr-4 font-medium text-white text-lg hover:bg-red-600 transition duration-100 active:bg-black"
+          >
+            Удалить событие!
           </button>
         </dialog>
         {date.toDateString() === now.toDateString() && (

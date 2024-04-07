@@ -62,6 +62,17 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.handle('save_events', async (_event, args: { payload: string }) => {
+    try {
+      writeFileSync(join(__dirname, '../../resources/events.json'), args.payload, {
+        encoding: 'utf8'
+      })
+      return { isSuccess: true }
+    } catch (err) {
+      console.log(err, args)
+      return { isSuccess: false }
+    }
+  })
   ipcMain.handle('get_events', async () => {
     try {
       const fileContent = readFileSync(join(__dirname, '../../resources/events.json'), 'utf8')
@@ -72,14 +83,33 @@ app.whenReady().then(() => {
       return { data: null, isSuccess: false }
     }
   })
-  ipcMain.handle('save_events', async (_event, args: { payload: string }) => {
+
+  ipcMain.handle('delete_event', async (_event, { eventData }: { eventData: EventType }) => {
     try {
-      writeFileSync(join(__dirname, '../../resources/events.json'), args.payload, {
-        encoding: 'utf8'
-      })
+      const fileContent = readFileSync(join(__dirname, '../../resources/events.json'), 'utf8')
+      const eventsData: EventType[] = JSON.parse(fileContent)
+
+      writeFileSync(
+        join(__dirname, '../../resources/events.json'),
+        JSON.stringify(
+          eventsData.filter(
+            (ev: EventType) =>
+              !(
+                ev.date === eventData.date &&
+                ev.name === eventData.name &&
+                ev.detail === eventData.detail &&
+                ev.startsHour === eventData.startsHour &&
+                ev.startsMinute === eventData.startsMinute
+              )
+          )
+        ),
+        {
+          encoding: 'utf8'
+        }
+      )
       return { isSuccess: true }
     } catch (err) {
-      console.log(err, args)
+      console.log(err, eventData)
       return { isSuccess: false }
     }
   })

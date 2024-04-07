@@ -29,6 +29,7 @@ export const getEvents = createAsyncThunk('get-events', async () => {
     await window.electron.ipcRenderer.invoke('get_events')
   return res.data
 })
+
 export const addEvent = createAsyncThunk('add-event', async (events: EventType[], thunkAPI) => {
   await window.electron.ipcRenderer.invoke('save_events', {
     payload: JSON.stringify(events)
@@ -40,6 +41,15 @@ export const startEvent = createAsyncThunk(
   'start-event',
   async ({ eventData }: { eventData: EventType }, thunkAPI) => {
     await window.electron.ipcRenderer.invoke('start_event', { eventData })
+    await thunkAPI.dispatch(getEvents())
+    return thunkAPI.fulfillWithValue('')
+  }
+)
+
+export const deleteEvent = createAsyncThunk(
+  'delete-event',
+  async ({ eventData }: { eventData: EventType }, thunkAPI) => {
+    await window.electron.ipcRenderer.invoke('delete_event', { eventData })
     await thunkAPI.dispatch(getEvents())
     return thunkAPI.fulfillWithValue('')
   }
