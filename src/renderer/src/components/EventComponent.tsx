@@ -25,7 +25,10 @@ const EventComponent = ({
       eventModified.startsHour +
       Math.floor((now.getMinutes() + (eventModified.endsMinute - eventModified.startsMinute)) / 60)
     eventModified.actualEndsMinute =
-      (now.getMinutes() + (eventModified.endsMinute - eventModified.startsMinute)) % 60
+      (now.getMinutes() +
+        (eventModified.endsHour - eventModified.startsHour) * 60 +
+        (eventModified.endsMinute - eventModified.startsMinute)) %
+      60
     await dispatch(startEvent({ eventData: eventModified }))
   }
 
@@ -38,6 +41,12 @@ const EventComponent = ({
     (timeCoef === -1 ||
       actualEndsHour < now.getHours() ||
       (actualEndsHour === now.getHours() && actualEndsMinute <= now.getMinutes()))
+  console.log(
+    isEndsInPast,
+    eventData.name,
+    actualEndsHour === now.getHours() && actualEndsMinute <= now.getMinutes()
+  )
+
   const isStartInFuture =
     timeCoef !== -1 &&
     (timeCoef === 1 ||

@@ -127,7 +127,9 @@ app.whenReady().then(() => {
           (ev) =>
             ev.date === args.eventData.date &&
             ev.name === args.eventData.name &&
-            ev.detail === args.eventData.detail
+            ev.detail === args.eventData.detail &&
+            ev.startsHour === args.eventData.startsHour &&
+            ev.startsMinute === args.eventData.startsMinute
         )
       ] = args.eventData
       writeFileSync(join(__dirname, '../../resources/events.json'), JSON.stringify(eventsData), {
