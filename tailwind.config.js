@@ -6,7 +6,7 @@ export default {
     extend: {
       colors: {
         main: '#20B1EF',
-        neutral: '#DFEF20',
+        neutral: '#CFDF10',
         upcoming: '#EF4520',
         completed: '#77EF6C'
       }
