@@ -5,9 +5,9 @@ export default {
     fontFamily: { sans: ['Montserrat', 'Arial'] },
     extend: {
       colors: {
-        main: '#20B1EF',
-        neutral: '#CFDF10',
-        upcoming: '#EF4520',
+        main: 'rgb(34,197,94)',
+        neutral: '#20B1EF',
+        upcoming: '#777777',
         completed: '#77EF6C'
       }
     }

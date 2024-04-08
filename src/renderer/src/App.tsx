@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Datepicker from 'tailwind-datepicker-react'
 import EventComponent from './components/EventComponent'
 import { useAppDispatch, useAppSelector } from './store'
@@ -77,7 +77,7 @@ const options = {
   todayBtnText: 'Сегодня',
   theme: {
     background: 'bg-[#333333] transition w-full',
-    todayBtn: 'transition bg-main hover:opacity-90 hover:bg-main',
+    todayBtn: 'transition bg-blue-400 hover:opacity-90 hover:bg-blue-500',
     clearBtn: 'transition',
     icons: 'transition',
     text: ' text-white hover:bg-[#777777] transition',
@@ -108,22 +108,30 @@ export type EventType = {
   actualEndsHour: number | null
   actualEndsMinute: number | null
 }
+
 function App(): JSX.Element {
   const dispatch = useAppDispatch()
+
   const state = useAppSelector((state) => state.main)
+
   const [date, setDate] = useState(new Date())
   const [now, setNow] = useState(new Date())
+
   const [isFormVisible, setIsFormVisible] = useState(false)
   const [customError, setCustomError] = useState('')
+
   const dateStr = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
+
   const handleChange = (selectedDate: Date): void => {
     setDate(selectedDate)
   }
+
   useEffect(() => {
     const id = setInterval(() => {
       setNow(new Date())
     }, 5000)
     dispatch(getEvents())
+    containerRef.current?.scroll({ top: 0, left: (now.getHours() - 3) * 90, behavior: 'smooth' })
     return () => clearInterval(id)
   }, [])
 
@@ -183,6 +191,8 @@ function App(): JSX.Element {
     xlsx([sheet], settings)
   }
 
+  const containerRef = useRef<HTMLElement>(null)
+
   const actualStartsHour =
     state.modalState.details?.actualStartsHour ?? state.modalState.details?.startsHour ?? -1
   const actualEndsHour =
@@ -208,7 +218,7 @@ function App(): JSX.Element {
             setShow={() => true}
           />
           <button
-            className=" bg-main hover:bg-indigo-400 transition py-3 grow rounded-[10px] text-lg font-semibold text-white"
+            className=" bg-blue-400 hover:bg-blue-500 transition py-3 grow rounded-[10px] text-lg font-semibold text-white"
             onClick={() => setIsFormVisible((p) => !p)}
           >
             {isFormVisible ? 'Скрыть' : '+Добавить'}
@@ -303,7 +313,10 @@ function App(): JSX.Element {
         )}
       </div>
       <div className="h-[105px] left-[513px] w-[352px] bg-white border-r border-r-black border-b border-b-black absolute z-10"></div>
-      <div className="overflow-y-scroll max-h-[99.5vh] relative">
+      <div
+        ref={containerRef as React.RefObject<HTMLDivElement>}
+        className="overflow-y-scroll max-h-[99.5vh] relative"
+      >
         <div className="flex h-[105px]">
           <div className="h-full flex items-center border-b border-b-black pr-[40px] relative left-[352px] z-0">
             {Array(25)
@@ -406,7 +419,7 @@ function App(): JSX.Element {
         </dialog>
         {date.toDateString() === now.toDateString() && (
           <div
-            className="absolute w-[2px] bg-upcoming h-full top-0 -z-10"
+            className="absolute w-[2px] bg-red-500 h-full top-0 -z-10"
             style={{
               left: `${38 + 352 + now.getHours() * 87 + Math.floor((now.getMinutes() * 87) / 60)}px`
             }}
