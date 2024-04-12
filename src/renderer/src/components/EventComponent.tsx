@@ -54,7 +54,8 @@ const EventComponent = ({
     <div className=" h-[110px] w-fit flex border-b border-b-black relative">
       <div
         onClick={handleShowDialog}
-        className="flex items-center w-[352px] h-full border-r border-black sticky left-0 bg-white z-10 hover:bg-slate-200 transition hover:cursor-pointer"
+        className="flex items-center w-[352px] h-full border-r border-black sticky left-0
+        z-50 bg-white hover:bg-slate-200 transition hover:cursor-pointer"
       >
         {isStartInFuture && timeCoef === 0 && !state.eventState.loading ? (
           <button onClick={handleStartButton} className="absolute left-5 top-[38px]">
@@ -125,7 +126,7 @@ const EventComponent = ({
         <div
           onClick={handleShowDialog}
           className={
-            `relative h-8 mt-[39px] rounded-full duration-100 z-50  hover:cursor-pointer` +
+            `relative h-8 mt-[39px] rounded-full duration-100 z-10 hover:cursor-pointer` +
             ((timeCoef === -1 && ' bg-main hover:bg-green-600') ||
               (timeCoef === 1 && ' bg-upcoming hover:bg-gray-600') ||
               (isEndsInPast && ' bg-main hover:bg-green-600') ||
