@@ -47,17 +47,22 @@ const EventComponent = ({
     (timeCoef === 1 ||
       actualStartsHour > now.getHours() ||
       (actualStartsHour === now.getHours() && actualStartsMinute > now.getMinutes()))
+
   const handleShowDialog = (): void => {
     dispatch(openModal(eventData))
   }
+
   return (
-    <div className=" h-[110px] w-fit flex border-b border-b-black relative">
+    <div
+      className={` h-[110px] w-fit flex border-b border-b-black relative ${eventData.date === '' ? 'border-l border-l-black first-of-type:border-t first-of-type:border-t-black' : ''}`}
+    >
       <div
         onClick={handleShowDialog}
-        className="flex items-center w-[352px] h-full border-r border-black sticky left-0
-        z-50 bg-white hover:bg-slate-200 transition hover:cursor-pointer"
+        className={`flex items-center w-[352px] h-full border-r border-black sticky left-0
+        z-50 bg-white hover:bg-slate-200 transition hover:cursor-pointer`}
       >
-        {isStartInFuture && timeCoef === 0 && !state.eventState.loading ? (
+        {(isStartInFuture && timeCoef === 0 && !state.eventState.loading) ||
+        eventData.date === '' ? (
           <button onClick={handleStartButton} className="absolute left-5 top-[38px]">
             <svg width="20" height="33" viewBox="0 0 20 33" fill="none">
               <path d="M0 33V0L19.5 16.5L0 33Z" fill="#4E4E4E" />
@@ -122,36 +127,38 @@ const EventComponent = ({
                   )}%`}
         </p>
       </div>
-      <div className="relative h-full w-[calc((87px*24)+87px)]">
-        <div
-          onClick={handleShowDialog}
-          className={
-            `relative h-8 mt-[39px] rounded-full duration-100 z-10 hover:cursor-pointer` +
-            ((timeCoef === -1 && ' bg-main hover:bg-green-600') ||
-              (timeCoef === 1 && ' bg-upcoming hover:bg-gray-600') ||
-              (isEndsInPast && ' bg-main hover:bg-green-600') ||
-              (isStartInFuture && ' bg-upcoming hover:bg-gray-600') ||
-              ' bg-neutral hover:bg-blue-500')
-          }
-          style={{
-            marginLeft: `${
-              40 +
-              87 *
-                (eventData.actualStartsHour === null
-                  ? eventData.startsHour
-                  : eventData.actualStartsHour) +
-              Math.floor(
-                ((eventData.actualStartsMinute === null
-                  ? eventData.startsMinute
-                  : eventData.actualStartsMinute) *
-                  87) /
-                  60
-              )
-            }px`,
-            width: `${87 * (eventData.endsHour - eventData.startsHour) + Math.floor(((eventData.endsMinute - eventData.startsMinute) / 60) * 87)}px`
-          }}
-        ></div>
-      </div>
+      {eventData.date !== '' && (
+        <div className="relative h-full w-[calc((87px*24)+87px)]">
+          <div
+            onClick={handleShowDialog}
+            className={
+              `relative h-8 mt-[39px] rounded-full duration-100 z-10 hover:cursor-pointer` +
+              ((timeCoef === -1 && ' bg-main hover:bg-green-600') ||
+                (timeCoef === 1 && ' bg-upcoming hover:bg-gray-600') ||
+                (isEndsInPast && ' bg-main hover:bg-green-600') ||
+                (isStartInFuture && ' bg-upcoming hover:bg-gray-600') ||
+                ' bg-neutral hover:bg-blue-500')
+            }
+            style={{
+              marginLeft: `${
+                40 +
+                87 *
+                  (eventData.actualStartsHour === null
+                    ? eventData.startsHour
+                    : eventData.actualStartsHour) +
+                Math.floor(
+                  ((eventData.actualStartsMinute === null
+                    ? eventData.startsMinute
+                    : eventData.actualStartsMinute) *
+                    87) /
+                    60
+                )
+              }px`,
+              width: `${87 * (eventData.endsHour - eventData.startsHour) + Math.floor(((eventData.endsMinute - eventData.startsMinute) / 60) * 87)}px`
+            }}
+          ></div>
+        </div>
+      )}
     </div>
   )
 }

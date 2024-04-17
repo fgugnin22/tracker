@@ -11,6 +11,9 @@ export interface State {
   eventState: {
     loading: boolean
   }
+  modalEventsState: {
+    isOpen: boolean
+  }
 }
 
 const initialState: State = {
@@ -21,6 +24,9 @@ const initialState: State = {
   },
   eventState: {
     loading: false
+  },
+  modalEventsState: {
+    isOpen: false
   }
 }
 
@@ -67,6 +73,12 @@ export const slice = createSlice({
     closeModal: (state) => {
       state.modalState.details = undefined
       state.modalState.isOpen = false
+    },
+    openEventsModal: (state) => {
+      state.modalEventsState.isOpen = true
+    },
+    closeEventsModal: (state) => {
+      state.modalEventsState.isOpen = false
     }
   },
   extraReducers: (builder) =>
@@ -104,6 +116,6 @@ export const slice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { openModal, closeModal } = slice.actions
+export const { openModal, closeModal, openEventsModal, closeEventsModal } = slice.actions
 
 export default slice.reducer

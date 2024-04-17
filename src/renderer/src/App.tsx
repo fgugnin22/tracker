@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import Datepicker from 'tailwind-datepicker-react'
 import EventComponent from './components/EventComponent'
 import { useAppDispatch, useAppSelector } from './store'
-import { addEvent, closeModal, deleteEvent, getEvents } from './store/actions'
+import { addEvent, closeModal, deleteEvent, getEvents, openEventsModal } from './store/actions'
 import xlsx, { IJsonSheet, ISettings } from 'json-as-xlsx'
+import EventsModal from './components/EventsModal'
 
 type EventExport = {
   название: string
@@ -152,13 +153,18 @@ function App(): JSX.Element {
       if (key === 'starts' || key === 'ends') {
         body[key + 'Hour'] = Number(String(value).split(':')[0])
         body[key + 'Minute'] = Number(String(value).split(':')[1])
-      } else if (key === 'date') {
+      } else if (key === 'date' && hasDate) {
         const arr = String(value).split('-')
         body[key] = `${arr[2]}.${arr[1]}.${arr[0]}`
       } else {
         body[key] = value
       }
     }
+
+    if (!hasDate) {
+      body.date = ''
+    }
+
     if (
       body.endsHour < body.startsHour ||
       (body.endsHour === body.startsHour && body.endsMinute <= body.startsMinute)
@@ -329,10 +335,14 @@ function App(): JSX.Element {
         )}
       </div>
       <div className="h-[105px] left-[513px] w-[352px] bg-white border-r border-r-black border-b border-b-black absolute z-10 flex items-center justify-center">
-        <button className="text-2xl font-medium hover:bg-slate-200 transiition duration-100 w-full h-full hover:underline">
+        <button
+          className="text-2xl font-medium hover:bg-slate-200 transiition duration-100 w-full h-full hover:underline"
+          onClick={() => dispatch(openEventsModal())}
+        >
           События без даты
         </button>
       </div>
+      {state.modalEventsState.isOpen && <EventsModal />}
       <div
         ref={containerRef as React.RefObject<HTMLDivElement>}
         className="overflow-y-scroll max-h-[99.5vh] relative"
