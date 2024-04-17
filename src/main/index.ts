@@ -125,7 +125,7 @@ app.whenReady().then(() => {
       eventsData[
         eventsData.findIndex(
           (ev) =>
-            ev.date === args.eventData.date &&
+            (ev.date === args.eventData.date || ev.date === '') &&
             ev.name === args.eventData.name &&
             ev.detail === args.eventData.detail &&
             ev.startsHour === args.eventData.startsHour &&

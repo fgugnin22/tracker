@@ -29,6 +29,12 @@ const EventComponent = ({
         (eventModified.endsHour - eventModified.startsHour) * 60 +
         (eventModified.endsMinute - eventModified.startsMinute)) %
       60
+
+    if (eventModified.date === '') {
+      eventModified.date = now.toLocaleDateString()
+    }
+    console.log(eventModified)
+
     await dispatch(startEvent({ eventData: eventModified }))
   }
 
@@ -128,7 +134,7 @@ const EventComponent = ({
         </p>
       </div>
       {eventData.date !== '' && (
-        <div className="relative h-full w-[calc((87px*24)+87px)]">
+        <div className="relative h-full w-[calc((87px*24)+87px)] overflow-hidden">
           <div
             onClick={handleShowDialog}
             className={
