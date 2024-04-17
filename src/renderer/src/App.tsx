@@ -114,6 +114,8 @@ function App(): JSX.Element {
 
   const state = useAppSelector((state) => state.main)
 
+  const [hasDate, setHasDate] = useState(true)
+
   const [date, setDate] = useState(new Date())
   const [now, setNow] = useState(new Date())
 
@@ -239,17 +241,31 @@ function App(): JSX.Element {
                 placeholder="Название"
               />
             </div>
-            <div className="flex gap-2 justify-between items-start">
-              <label className="mt-[2px]" htmlFor="">
+            <div className="flex gap-2 justify-between items-center h-[37px]">
+              <label className="mb-1" htmlFor="">
                 Дата:{' '}
               </label>
-              <input
-                required
-                defaultValue={`${date.getFullYear()}-${date.getMonth() + 1 > 9 ? date.getMonth() + 1 : `0${date.getMonth() + 1}`}-${date.getDate() > 9 ? date.getDate() : `0${date.getDate()}`}`}
-                name="date"
-                className="border rounded-[10px] p-[5px] text-base"
-                type="date"
-              />
+              <div className="mr-auto mb-1 flex items-center">
+                <input
+                  id="checked-checkbox"
+                  type="checkbox"
+                  value=""
+                  onChange={() => setHasDate(!hasDate)}
+                  className="w-5 h-5 text-blue-600
+     bg-gray-100 border-gray-300 rounded focus:ring-blue-500 
+     dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  checked={hasDate}
+                />
+              </div>
+              {hasDate && (
+                <input
+                  required
+                  defaultValue={`${date.getFullYear()}-${date.getMonth() + 1 > 9 ? date.getMonth() + 1 : `0${date.getMonth() + 1}`}-${date.getDate() > 9 ? date.getDate() : `0${date.getDate()}`}`}
+                  name="date"
+                  className="border rounded-[10px] p-[5px] text-base"
+                  type="date"
+                />
+              )}
             </div>
             <div className="flex gap-2 justify-between items-start">
               <label className="mt-[2px]" htmlFor="timeFrom">
@@ -312,7 +328,11 @@ function App(): JSX.Element {
           </div>
         )}
       </div>
-      <div className="h-[105px] left-[513px] w-[352px] bg-white border-r border-r-black border-b border-b-black absolute z-10"></div>
+      <div className="h-[105px] left-[513px] w-[352px] bg-white border-r border-r-black border-b border-b-black absolute z-10 flex items-center justify-center">
+        <button className="text-2xl font-medium hover:bg-slate-200 transiition duration-100 w-full h-full hover:underline">
+          События без даты
+        </button>
+      </div>
       <div
         ref={containerRef as React.RefObject<HTMLDivElement>}
         className="overflow-y-scroll max-h-[99.5vh] relative"
@@ -358,6 +378,7 @@ function App(): JSX.Element {
                 />
               )
             })}
+
         <dialog
           open={state.modalState.isOpen}
           className="w-96 min-h-96 pl-4 pt-2 pb-3 rounded-[10px] shadow-md shadow-gray-100
