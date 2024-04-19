@@ -143,18 +143,22 @@ function App(): JSX.Element {
     if (!form.reportValidity()) {
       return
     }
+
     const formData = new FormData(form)
     const body: EventType = (state.events.data[0] && { ...state.events.data[0] }) ?? {}
+
     body.actualStartsHour = null
     body.actualStartsMinute = null
     body.actualEndsHour = null
     body.actualEndsMinute = null
+
     for (const [key, value] of formData.entries()) {
       if (key === 'starts' || key === 'ends') {
         body[key + 'Hour'] = Number(String(value).split(':')[0])
         body[key + 'Minute'] = Number(String(value).split(':')[1])
       } else if (key === 'date' && hasDate) {
         const arr = String(value).split('-')
+
         body[key] = `${arr[2]}.${arr[1]}.${arr[0]}`
       } else {
         body[key] = value
@@ -162,6 +166,8 @@ function App(): JSX.Element {
     }
 
     if (!hasDate) {
+      body.startsHour = 0
+      body.startsMinute = 0
       body.date = ''
     }
 
@@ -170,6 +176,7 @@ function App(): JSX.Element {
       (body.endsHour === body.startsHour && body.endsMinute <= body.startsMinute)
     ) {
       setCustomError('Начало должно быть раньше конца!')
+
       setTimeout(() => setCustomError(''), 3000)
       return
     }
@@ -273,34 +280,55 @@ function App(): JSX.Element {
                 />
               )}
             </div>
-            <div className="flex gap-2 justify-between items-start">
-              <label className="mt-[2px]" htmlFor="timeFrom">
-                Начинается в:
-              </label>
-              <input
-                required
-                name="starts"
-                className="border rounded-[10px] p-[5px] text-base"
-                type="text"
-                id="timeFrom"
-                placeholder="09:00"
-                pattern="[0-9]{2}:[0-9]{2}"
-              />
-            </div>
-            <div className="flex gap-2 justify-between items-start">
-              <label className="mt-[2px]" htmlFor="timeTo">
-                Заканчивается в:
-              </label>
-              <input
-                required
-                name="ends"
-                className="border rounded-[10px] p-[5px] text-base"
-                type="text"
-                id="timeTo"
-                placeholder="23:59"
-                pattern="[0-9]{2}:[0-9]{2}"
-              />
-            </div>
+            {hasDate ? (
+              <>
+                <div key={'first'} className="flex gap-2 justify-between items-start">
+                  <label className="mt-[2px]" htmlFor="timeFrom">
+                    Начинается в:
+                  </label>
+                  <input
+                    required
+                    name="starts"
+                    className="border rounded-[10px] p-[5px] text-base"
+                    type="text"
+                    id="timeFrom"
+                    placeholder="09:00"
+                    pattern="[0-9]{2}:[0-9]{2}"
+                  />
+                </div>
+                <div key={'second'} className="flex gap-2 justify-between items-start">
+                  <label className="mt-[2px]" htmlFor="timeTo">
+                    Заканчивается в:
+                  </label>
+                  <input
+                    required
+                    name="ends"
+                    className="border rounded-[10px] p-[5px] text-base"
+                    type="text"
+                    id="timeTo"
+                    placeholder="23:59"
+                    pattern="[0-9]{2}:[0-9]{2}"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div key={'third'} className="flex gap-2 justify-between items-start">
+                  <label className="mt-[2px]" htmlFor="timeTo">
+                    Продолжительность:
+                  </label>
+                  <input
+                    required
+                    name="ends"
+                    className="border rounded-[10px] p-[5px] text-base"
+                    type="text"
+                    id="timeTo"
+                    placeholder="02:30"
+                    pattern="[0-9]{2}:[0-9]{2}"
+                  />
+                </div>
+              </>
+            )}
             <div className="flex gap-2 justify-between items-start">
               <label className="mt-[2px]" htmlFor="details">
                 Описание:
@@ -397,22 +425,34 @@ function App(): JSX.Element {
           <p className="text-xl max-w-72 break-words">
             <span className="font-semibold">Название:</span> {state.modalState.details?.name}
           </p>
-          <p className="text-xl max-w-72 break-words">
-            {' '}
-            <span className="font-semibold">Дата:</span> {state.modalState.details?.date}
-          </p>
-          <p className="text-xl max-w-72 break-words">
-            <span className="font-semibold">Начало:</span>{' '}
-            {`${actualStartsHour > 9 ? actualStartsHour : `0${actualStartsHour}`}:${
-              actualStartsMinute > 9 ? actualStartsMinute : `0${actualStartsMinute}`
-            }`}
-          </p>
-          <p className="text-xl max-w-72 break-words">
-            <span className="font-semibold">Конец:</span>{' '}
-            {`${actualEndsHour > 9 ? actualEndsHour : `0${actualEndsHour}`}:${
-              actualEndsMinute > 9 ? actualEndsMinute : `0${actualEndsMinute}`
-            }`}
-          </p>
+
+          {state.modalState.details?.date !== '' ? (
+            <>
+              <p key={'fourthp'} className="text-xl max-w-72 break-words">
+                {' '}
+                <span className="font-semibold">Дата:</span> {state.modalState.details?.date}
+              </p>
+              <p key={'firstp'} className="text-xl max-w-72 break-words">
+                <span className="font-semibold">Начало:</span>{' '}
+                {`${actualStartsHour > 9 ? actualStartsHour : `0${actualStartsHour}`}:${
+                  actualStartsMinute > 9 ? actualStartsMinute : `0${actualStartsMinute}`
+                }`}
+              </p>
+              <p key={'secondp'} className="text-xl max-w-72 break-words">
+                <span className="font-semibold">Конец:</span>{' '}
+                {`${actualEndsHour > 9 ? actualEndsHour : `0${actualEndsHour}`}:${
+                  actualEndsMinute > 9 ? actualEndsMinute : `0${actualEndsMinute}`
+                }`}
+              </p>
+            </>
+          ) : (
+            <p key={'thirdp'} className="text-xl max-w-72 break-words">
+              <span className="font-semibold">Продолжительность:</span>{' '}
+              {`${actualEndsHour > 9 ? actualEndsHour : `0${actualEndsHour}`}:${
+                actualEndsMinute > 9 ? actualEndsMinute : `0${actualEndsMinute}`
+              }`}
+            </p>
+          )}
           <p className="text-xl max-w-[352px] break-words">
             <span className="font-semibold">Описание:</span> {state.modalState.details?.details}
           </p>
