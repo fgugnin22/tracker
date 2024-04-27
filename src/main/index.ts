@@ -3,6 +3,48 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { readFileSync, writeFileSync } from 'fs'
+import sqlite3 from 'sqlite3'
+
+const db = new (sqlite3.verbose().Database)(join(__dirname, '../../resources/data.sqlite3'))
+
+db.serialize(() => {
+  db.run(`CREATE TABLE IF NOT EXISTS "tasks" (
+    "id"	INTEGER NOT NULL UNIQUE,
+    "duration"	INTEGER,
+    "s_hour"	INTEGER,
+    "s_minute"	INTEGER,
+    "e_hour"	INTEGER,
+    "as_hour"	INTEGER,
+    "as_minute"	INTEGER,
+    "e_minute"	INTEGER,
+    "date"	TEXT,
+    "desc"	TEXT,
+    "name"	TEXT,
+    "group_name"	TEXT,
+    PRIMARY KEY("id" AUTOINCREMENT)
+  );`)
+  //   db.run(`
+  //   INSERT INTO tasks (duration, s_hour, s_minute, e_hour, as_hour, as_minute, e_minute, date, desc, name, group_name)
+  //   VALUES
+  //     (60, 9, 0, 10, 9, 0, 10, '27.04.2024', 'Dummy Task 1', 'Task 1', '123'),
+  //     (120, 10, 0, 12, 10, 0, 12, '27.04.2024', 'Dummy Task 2', 'Task 2', '123'),
+  //     (45, 12, 0, 12, 12, 0, 12, '27.04.2024', 'Dummy Task 3', 'Task 3', '123'),
+  //     (90, 14, 0, 15, 14, 0, 15, '27.04.2024', 'Dummy Task 4', 'Task 4', '123'),
+  //     (30, 16, 0, 16, 16, 0, 16, '27.04.2024', 'Dummy Task 5', 'Task 5', '123');
+  // `)
+})
+;(async (): Promise<void> => {
+  const res = await new Promise((res) => {
+    db.all(
+      'SELECT id, duration, s_hour, s_minute, e_hour, as_hour, as_minute, e_minute, date, desc, name FROM tasks',
+      (err, rows) => {
+        console.log(err, rows)
+
+        res(rows)
+      }
+    )
+  })
+})()
 
 function createWindow(): void {
   // Create the browser window.

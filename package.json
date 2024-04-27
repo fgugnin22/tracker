@@ -23,9 +23,11 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
+    "@electron/rebuild": "^3.6.0",
     "@reduxjs/toolkit": "^2.2.1",
     "json-as-xlsx": "^2.5.6",
-    "react-redux": "^9.1.0"
+    "react-redux": "^9.1.0",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
