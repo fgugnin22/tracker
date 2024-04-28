@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { EventType } from '@renderer/App'
+import { EventType } from '@renderer/types'
 
 export interface State {
   events: { data: EventType[]; isSuccess: boolean }
@@ -31,36 +31,92 @@ const initialState: State = {
 }
 
 export const getEvents = createAsyncThunk('get-events', async () => {
-  const res: { data: EventType[]; isSuccess: boolean } =
-    await window.electron.ipcRenderer.invoke('get_events')
-  return res.data
+  const res: EventType[] = await window.electron.ipcRenderer.invoke(
+    'db-query',
+    'SELECT * FROM tasks;'
+  )
+
+  return res
 })
 
-export const addEvent = createAsyncThunk('add-event', async (events: EventType[], thunkAPI) => {
-  await window.electron.ipcRenderer.invoke('save_events', {
-    payload: JSON.stringify(events)
-  })
+export const addEvent = createAsyncThunk('add-event', async (event: EventType, thunkAPI) => {
+  const sql = `INSERT INTO tasks 
+  (
+    duration,
+    s_hour,
+    s_minute,
+    e_hour,
+    e_minute,
+    as_hour,
+    as_minute,
+    ae_hour,
+    ae_minute,
+    date,
+    desc,
+    name,
+    group_name
+  )
+  VALUES 
+  (
+    ${event.duration ? `'${event.duration}'` : 'NULL'},
+    ${event.s_hour ? `'${event.s_hour}'` : 'NULL'},
+    ${event.s_minute ? `'${event.s_minute}'` : 'NULL'},
+    ${event.e_hour ? `'${event.e_hour}'` : 'NULL'},
+    ${event.e_minute ? `'${event.e_minute}'` : 'NULL'},
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    ${event.date ? `'${event.date}'` : '""'},
+    ${event.desc ? `'${event.desc}'` : 'NULL'},
+    ${event.name ? `'${event.name}'` : 'NULL'},
+    ${event.group_name ? `'${event.group_name}'` : 'NULL'}
+  )`
+
+  console.log(sql)
+
+  await window.electron.ipcRenderer.invoke('db-exec', sql)
+
+  await thunkAPI.dispatch(getEvents())
+
+  return thunkAPI.fulfillWithValue('')
+})
+
+export const updateEvent = createAsyncThunk(
+  'start-event',
+  async ({ eventData }: { eventData: EventType }, thunkAPI) => {
+    const sql = `UPDATE tasks SET
+      duration = ${eventData.duration ? `'${eventData.duration}'` : 'NULL'}, 
+      s_hour = ${eventData.s_hour ? `'${eventData.s_hour}'` : 'NULL'}, 
+      s_minute = ${eventData.s_minute ? `'${eventData.s_minute}'` : 'NULL'}, 
+      e_hour = ${eventData.e_hour ? `'${eventData.e_hour}'` : 'NULL'}, 
+      e_minute = ${eventData.e_minute ? `'${eventData.e_minute}'` : 'NULL'}, 
+      as_hour = ${eventData.as_hour ? `'${eventData.as_hour}'` : 'NULL'},  
+      as_minute = ${eventData.as_minute ? `'${eventData.as_minute}'` : 'NULL'},  
+      ae_hour = ${eventData.ae_hour ? `'${eventData.e_minute}'` : 'NULL'},  
+      ae_minute = ${eventData.ae_minute ? `'${eventData.e_minute}'` : 'NULL'},  
+      date = ${eventData.date ? `'${eventData.date}'` : 'NULL'}, 
+      desc = ${eventData.desc ? `'${eventData.desc}'` : 'NULL'}, 
+      name = ${eventData.name ? `'${eventData.name}'` : 'NULL'}, 
+      group_name = ${eventData.group_name ? `'${eventData.group_name}'` : 'NULL'}
+      WHERE id = '${eventData.id}';
+    `
+    console.log(sql)
+
+    await window.electron.ipcRenderer.invoke('db-exec', sql)
+
+    await thunkAPI.dispatch(getEvents())
+
+    return thunkAPI.fulfillWithValue('')
+  }
+)
+
+export const deleteEvent = createAsyncThunk('delete-event', async (id: number, thunkAPI) => {
+  await window.electron.ipcRenderer.invoke('db-exec', `DELETE FROM tasks WHERE id = '${id ?? -1}';`)
+
   await thunkAPI.dispatch(getEvents())
   return thunkAPI.fulfillWithValue('')
 })
-export const startEvent = createAsyncThunk(
-  'start-event',
-  async ({ eventData }: { eventData: EventType }, thunkAPI) => {
-    await window.electron.ipcRenderer.invoke('start_event', { eventData })
-    await thunkAPI.dispatch(getEvents())
-    return thunkAPI.fulfillWithValue('')
-  }
-)
-
-export const deleteEvent = createAsyncThunk(
-  'delete-event',
-  async ({ eventData }: { eventData: EventType }, thunkAPI) => {
-    await window.electron.ipcRenderer.invoke('delete_event', { eventData })
-    await thunkAPI.dispatch(getEvents())
-    return thunkAPI.fulfillWithValue('')
-  }
-)
-// export const exportEvents = createAsyncThunk('add-event', async (args, thunkAPI) => {})
 
 export const slice = createSlice({
   name: 'state',
@@ -104,13 +160,13 @@ export const slice = createSlice({
       .addCase(addEvent.fulfilled, (state) => {
         state.eventState.loading = false
       })
-      .addCase(startEvent.pending, (state) => {
+      .addCase(updateEvent.pending, (state) => {
         state.eventState.loading = true
       })
-      .addCase(startEvent.rejected, (state) => {
+      .addCase(updateEvent.rejected, (state) => {
         state.eventState.loading = false
       })
-      .addCase(startEvent.fulfilled, (state) => {
+      .addCase(updateEvent.fulfilled, (state) => {
         state.eventState.loading = false
       })
 })

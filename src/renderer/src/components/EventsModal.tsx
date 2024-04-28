@@ -6,9 +6,7 @@ import { closeEventsModal } from '@renderer/store/actions'
 const EventsModal = (): ReactNode => {
   const dispatch = useAppDispatch()
 
-  const events = useAppSelector((state) => state.main.events.data).filter(
-    (event) => event.date === ''
-  )
+  const events = useAppSelector((state) => state.main.events.data).filter((event) => !event.date)
 
   const [query, setQuery] = useState('')
 

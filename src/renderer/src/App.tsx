@@ -2,126 +2,23 @@ import { useEffect, useRef, useState } from 'react'
 import Datepicker from 'tailwind-datepicker-react'
 import EventComponent from './components/EventComponent'
 import { useAppDispatch, useAppSelector } from './store'
-import { addEvent, closeModal, deleteEvent, getEvents, openEventsModal } from './store/actions'
+import { getEvents, openEventsModal } from './store/actions'
 import xlsx, { IJsonSheet, ISettings } from 'json-as-xlsx'
 import EventsModal from './components/EventsModal'
-
-type EventExport = {
-  название: string
-  дата: string
-  начало: string
-  конец: string
-  длительность: string
-  описание: string
-}
-
-const sortEvents = (events: EventType[]): EventType[] => {
-  return events.toSorted((a, b) => {
-    const yearA = Number(a.date.slice(6, undefined))
-    const yearB = Number(b.date.slice(6, undefined))
-    if (yearA !== yearB) {
-      return yearA - yearB
-    }
-
-    const monthA = Number(a.date.slice(3, 5))
-    const monthB = Number(b.date.slice(3, 5))
-    if (monthA !== monthB) {
-      return monthA - monthB
-    }
-
-    const dayA = Number(a.date.slice(0, 2))
-    const dayB = Number(b.date.slice(0, 2))
-    return dayA - dayB
-  })
-}
-
-const transformEvents = (events: EventType[]): EventExport[] => {
-  return sortEvents(events).map((ev) => {
-    const durationInMinutes = (ev.endsHour - ev.startsHour) * 60 + (ev.endsMinute - ev.startsMinute)
-    const evExport = {
-      название: ev.name,
-      дата: ev.date,
-      начало:
-        ev.actualStartsHour !== null
-          ? `${ev.actualStartsHour}:${ev.actualStartsMinute}`
-          : `${ev.startsHour}:${ev.startsMinute}`,
-      конец:
-        ev.actualEndsHour !== null
-          ? `${ev.actualEndsHour}:${ev.actualEndsMinute}`
-          : `${ev.endsHour}:${ev.endsMinute}`,
-      длительность: `${Math.floor(durationInMinutes / 60)} часов, ${durationInMinutes % 60} минут`,
-      описание: ev.details
-    }
-    return evExport
-  })
-}
-
-const months = [
-  'Январь',
-  'Февраль',
-  'Март',
-  'Апрель',
-  'Май',
-  'Июнь',
-  'Июль',
-  'Август',
-  'Сентябрь',
-  'Октябрь',
-  'Ноябрь',
-  'Декабрь'
-]
-const options = {
-  autoHide: true,
-  todayBtn: true,
-  clearBtn: true,
-  clearBtnText: 'Сбросить',
-  todayBtnText: 'Сегодня',
-  theme: {
-    background: 'bg-[#333333] transition w-full',
-    todayBtn: 'transition bg-blue-400 hover:opacity-90 hover:bg-blue-500',
-    clearBtn: 'transition',
-    icons: 'transition',
-    text: ' text-white hover:bg-[#777777] transition',
-    disabledText: 'bg-gray-300 text-black transition',
-    input: 'transition text-center !hidden',
-    inputIcon: 'transition !hidden',
-    selected: ' bg-[#666666]'
-  },
-  datepickerClassNames: ' !static !gap-4 ',
-  defaultDate: new Date(),
-  language: 'ru',
-  disabledDates: [],
-  weekDays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
-  inputNameProp: 'date',
-  inputIdProp: 'date',
-  inputPlaceholderProp: 'Выбрать дату'
-}
-export type EventType = {
-  name: string
-  date: string
-  startsHour: number
-  startsMinute: number
-  endsHour: number
-  endsMinute: number
-  details: string
-  actualStartsHour: number | null
-  actualStartsMinute: number | null
-  actualEndsHour: number | null
-  actualEndsMinute: number | null
-}
+import CreateEventForm from './components/CreateEventForm'
+import { transformEvents } from './util/transformEvents'
+import { datePickOptions, months } from './constants'
+import EventModal from './components/EventModal'
 
 function App(): JSX.Element {
   const dispatch = useAppDispatch()
 
   const state = useAppSelector((state) => state.main)
 
-  const [hasDate, setHasDate] = useState(true)
-
   const [date, setDate] = useState(new Date())
   const [now, setNow] = useState(new Date())
 
   const [isFormVisible, setIsFormVisible] = useState(false)
-  const [customError, setCustomError] = useState('')
 
   const dateStr = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
 
@@ -135,56 +32,9 @@ function App(): JSX.Element {
     }, 5000)
     dispatch(getEvents())
     containerRef.current?.scroll({ top: 0, left: (now.getHours() - 3) * 90, behavior: 'smooth' })
+
     return () => clearInterval(id)
   }, [])
-
-  const handleSaveClick = async (): Promise<undefined> => {
-    const form = document.querySelector('form') as HTMLFormElement
-    if (!form.reportValidity()) {
-      return
-    }
-
-    const formData = new FormData(form)
-    const body: EventType = (state.events.data[0] && { ...state.events.data[0] }) ?? {}
-
-    body.actualStartsHour = null
-    body.actualStartsMinute = null
-    body.actualEndsHour = null
-    body.actualEndsMinute = null
-
-    for (const [key, value] of formData.entries()) {
-      if (key === 'starts' || key === 'ends') {
-        body[key + 'Hour'] = Number(String(value).split(':')[0])
-        body[key + 'Minute'] = Number(String(value).split(':')[1])
-      } else if (key === 'date' && hasDate) {
-        const arr = String(value).split('-')
-
-        body[key] = `${arr[2]}.${arr[1]}.${arr[0]}`
-      } else {
-        body[key] = value
-      }
-    }
-
-    if (!hasDate) {
-      body.startsHour = 0
-      body.startsMinute = 0
-      body.date = ''
-    }
-
-    if (
-      body.endsHour < body.startsHour ||
-      (body.endsHour === body.startsHour && body.endsMinute <= body.startsMinute)
-    ) {
-      setCustomError('Начало должно быть раньше конца!')
-
-      setTimeout(() => setCustomError(''), 3000)
-      return
-    }
-    const events = [...state.events.data]
-    events.push(body)
-    await dispatch(addEvent(events))
-    setIsFormVisible(false)
-  }
 
   const handleExportButtonClick = (): void => {
     const sheet: IJsonSheet = {
@@ -208,14 +58,6 @@ function App(): JSX.Element {
 
   const containerRef = useRef<HTMLElement>(null)
 
-  const actualStartsHour =
-    state.modalState.details?.actualStartsHour ?? state.modalState.details?.startsHour ?? -1
-  const actualEndsHour =
-    state.modalState.details?.actualEndsHour ?? state.modalState.details?.endsHour ?? -1
-  const actualStartsMinute =
-    state.modalState.details?.actualStartsMinute ?? state.modalState.details?.startsMinute ?? -1
-  const actualEndsMinute =
-    state.modalState.details?.actualEndsMinute ?? state.modalState.details?.endsMinute ?? -1
   return (
     <div className=" flex min-h-screen border border-t-black ">
       <div
@@ -227,7 +69,7 @@ function App(): JSX.Element {
         <div className="flex flex-col gap-8 w-full">
           <Datepicker
             classNames=""
-            options={options}
+            options={datePickOptions}
             onChange={handleChange}
             show={true}
             setShow={() => true}
@@ -241,112 +83,7 @@ function App(): JSX.Element {
         </div>
 
         {isFormVisible ? (
-          <form className="flex flex-col gap-2 w-full mt-8 text-lg font-medium">
-            <div className="flex gap-2 justify-between items-start">
-              <label className="mt-[2px]" htmlFor="">
-                Название:{' '}
-              </label>
-              <input
-                required
-                name="name"
-                className="border rounded-[10px] p-[5px] text-base"
-                type="text"
-                placeholder="Название"
-              />
-            </div>
-            <div className="flex gap-2 justify-between items-center h-[37px]">
-              <label className="mb-1" htmlFor="">
-                Дата:{' '}
-              </label>
-              <div className="mr-auto mb-1 flex items-center">
-                <input
-                  id="checked-checkbox"
-                  type="checkbox"
-                  value=""
-                  onChange={() => setHasDate(!hasDate)}
-                  className="w-5 h-5 text-blue-600
-     bg-gray-100 border-gray-300 rounded focus:ring-blue-500 
-     dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  checked={hasDate}
-                />
-              </div>
-              {hasDate && (
-                <input
-                  required
-                  defaultValue={`${date.getFullYear()}-${date.getMonth() + 1 > 9 ? date.getMonth() + 1 : `0${date.getMonth() + 1}`}-${date.getDate() > 9 ? date.getDate() : `0${date.getDate()}`}`}
-                  name="date"
-                  className="border rounded-[10px] p-[5px] text-base"
-                  type="date"
-                />
-              )}
-            </div>
-            {hasDate ? (
-              <>
-                <div key={'first'} className="flex gap-2 justify-between items-start">
-                  <label className="mt-[2px]" htmlFor="timeFrom">
-                    Начинается в:
-                  </label>
-                  <input
-                    required
-                    name="starts"
-                    className="border rounded-[10px] p-[5px] text-base"
-                    type="text"
-                    id="timeFrom"
-                    placeholder="09:00"
-                    pattern="[0-9]{2}:[0-9]{2}"
-                  />
-                </div>
-                <div key={'second'} className="flex gap-2 justify-between items-start">
-                  <label className="mt-[2px]" htmlFor="timeTo">
-                    Заканчивается в:
-                  </label>
-                  <input
-                    required
-                    name="ends"
-                    className="border rounded-[10px] p-[5px] text-base"
-                    type="text"
-                    id="timeTo"
-                    placeholder="23:59"
-                    pattern="[0-9]{2}:[0-9]{2}"
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                <div key={'third'} className="flex gap-2 justify-between items-start">
-                  <label className="mt-[2px]" htmlFor="timeTo">
-                    Продолжительность:
-                  </label>
-                  <input
-                    required
-                    name="ends"
-                    className="border rounded-[10px] p-[5px] text-base"
-                    type="text"
-                    id="timeTo"
-                    placeholder="02:30"
-                    pattern="[0-9]{2}:[0-9]{2}"
-                  />
-                </div>
-              </>
-            )}
-            <div className="flex gap-2 justify-between items-start">
-              <label className="mt-[2px]" htmlFor="details">
-                Описание:
-              </label>
-              <textarea
-                name="details"
-                className="border rounded-[10px] p-[5px] text-base grow"
-                id="details"
-              />
-            </div>
-            <button
-              className=" bg-gray-500 hover:bg-slate-600 transition py-3 grow rounded-[10px] text-lg font-semibold text-white"
-              type="button"
-              onClick={handleSaveClick}
-            >
-              {customError.length > 0 ? customError : 'Сохранить'}
-            </button>
-          </form>
+          <CreateEventForm setFormVisibility={setIsFormVisible} />
         ) : (
           <div className=" w-full flex flex-col gap-4 grow pt-4">
             <p className=" text-[20px]">
@@ -417,77 +154,7 @@ function App(): JSX.Element {
               )
             })}
 
-        <dialog
-          open={state.modalState.isOpen}
-          className="w-96 min-h-96 pl-4 pt-2 pb-3 rounded-[10px] shadow-md shadow-gray-100
-         fixed left-[890px] top-[120px] ml-1 mt-1 z-50 bg-white border border-black open:flex flex-col gap-2"
-        >
-          <p className="text-xl max-w-72 break-words">
-            <span className="font-semibold">Название:</span> {state.modalState.details?.name}
-          </p>
-
-          {state.modalState.details?.date !== '' ? (
-            <>
-              <p key={'fourthp'} className="text-xl max-w-72 break-words">
-                {' '}
-                <span className="font-semibold">Дата:</span> {state.modalState.details?.date}
-              </p>
-              <p key={'firstp'} className="text-xl max-w-72 break-words">
-                <span className="font-semibold">Начало:</span>{' '}
-                {`${actualStartsHour > 9 ? actualStartsHour : `0${actualStartsHour}`}:${
-                  actualStartsMinute > 9 ? actualStartsMinute : `0${actualStartsMinute}`
-                }`}
-              </p>
-              <p key={'secondp'} className="text-xl max-w-72 break-words">
-                <span className="font-semibold">Конец:</span>{' '}
-                {`${actualEndsHour > 9 ? actualEndsHour : `0${actualEndsHour}`}:${
-                  actualEndsMinute > 9 ? actualEndsMinute : `0${actualEndsMinute}`
-                }`}
-              </p>
-            </>
-          ) : (
-            <p key={'thirdp'} className="text-xl max-w-72 break-words">
-              <span className="font-semibold">Продолжительность:</span>{' '}
-              {`${actualEndsHour > 9 ? actualEndsHour : `0${actualEndsHour}`}:${
-                actualEndsMinute > 9 ? actualEndsMinute : `0${actualEndsMinute}`
-              }`}
-            </p>
-          )}
-          <p className="text-xl max-w-[352px] break-words">
-            <span className="font-semibold">Описание:</span> {state.modalState.details?.details}
-          </p>
-          <button
-            className="text-3xl absolute top-2 right-2 rotate-45 w-10 h-10 hover:bg-slate-300 rounded-full flex items-center justify-center transition border"
-            onClick={() => dispatch(closeModal())}
-          >
-            +
-          </button>
-          <button
-            onClick={async (e) => {
-              ;(e.target as HTMLButtonElement).disabled = true
-              const ev = state.events.data.find(
-                (e) =>
-                  e.name === state.modalState.details?.name &&
-                  e.details === state.modalState.details?.details &&
-                  e.date === state.modalState.details?.date &&
-                  e.startsHour === state.modalState.details?.startsHour &&
-                  e.startsMinute === state.modalState.details?.startsMinute
-              )
-
-              if (!ev) {
-                ;(e.target as HTMLButtonElement).disabled = false
-                return
-              }
-
-              await dispatch(deleteEvent({ eventData: ev }))
-              ;(e.target as HTMLButtonElement).disabled = false
-              dispatch(closeModal())
-            }}
-            className="mt-auto p-3 rounded-[10px] bg-red-500 mr-4 font-medium text-white text-lg hover:bg-red-600 transition duration-100 active:bg-black"
-          >
-            Удалить событие!
-          </button>
-        </dialog>
+        <EventModal />
         {date.toDateString() === now.toDateString() && (
           <div
             className="absolute w-[2px] bg-red-500 h-full top-0 -z-10"

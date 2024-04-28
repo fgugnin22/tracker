@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
-import { EventType } from '../App'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
-import { openModal, startEvent } from '@renderer/store/actions'
+import { openModal, updateEvent } from '@renderer/store/actions'
+import { EventType } from '@renderer/types'
 
 const EventComponent = ({
   eventData,
@@ -12,22 +12,24 @@ const EventComponent = ({
 }): ReactNode => {
   const dispatch = useAppDispatch()
   const state = useAppSelector((state) => state.main)
+
   const now = new Date()
+
   const handleStartButton = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation()
     const eventModified = { ...eventData }
     const now = new Date()
-    eventModified.actualStartsHour = now.getHours()
-    eventModified.actualStartsMinute = now.getMinutes()
-    eventModified.actualEndsHour =
+    eventModified.as_hour = now.getHours()
+    eventModified.as_minute = now.getMinutes()
+    eventModified.ae_hour =
       now.getHours() +
-      eventModified.endsHour -
-      eventModified.startsHour +
-      Math.floor((now.getMinutes() + (eventModified.endsMinute - eventModified.startsMinute)) / 60)
-    eventModified.actualEndsMinute =
+      eventModified.e_hour! -
+      eventModified.s_hour! +
+      Math.floor((now.getMinutes() + (eventModified.e_minute! - eventModified.s_minute!)) / 60)
+    eventModified.ae_minute =
       (now.getMinutes() +
-        (eventModified.endsHour - eventModified.startsHour) * 60 +
-        (eventModified.endsMinute - eventModified.startsMinute)) %
+        (eventModified.e_hour! - eventModified.s_hour!) * 60 +
+        (eventModified.e_minute! - eventModified.s_minute!)) %
       60
 
     if (eventModified.date === '') {
@@ -35,13 +37,13 @@ const EventComponent = ({
     }
     console.log(eventModified)
 
-    await dispatch(startEvent({ eventData: eventModified }))
+    await dispatch(updateEvent({ eventData: eventModified }))
   }
 
-  const actualStartsHour = eventData.actualStartsHour ?? eventData.startsHour
-  const actualEndsHour = eventData.actualEndsHour ?? eventData.endsHour
-  const actualStartsMinute = eventData.actualStartsMinute ?? eventData.startsMinute
-  const actualEndsMinute = eventData.actualEndsMinute ?? eventData.endsMinute
+  const actualStartsHour = Number(eventData.as_hour ?? eventData.s_hour)
+  const actualEndsHour = Number(eventData.ae_hour ?? eventData.e_hour)
+  const actualStartsMinute = Number(eventData.as_minute ?? eventData.s_minute)
+  const actualEndsMinute = Number(eventData.ae_minute ?? eventData.e_minute)
   const isEndsInPast =
     timeCoef !== 1 &&
     (timeCoef === -1 ||
@@ -110,30 +112,30 @@ const EventComponent = ({
             ? '100%'
             : isStartInFuture
               ? '0%'
-              : eventData.actualStartsHour === null
+              : eventData.as_hour === null
                 ? `${Math.round(
                     (1 -
-                      ((eventData.endsHour - now.getHours()) * 60 +
-                        eventData.endsMinute -
+                      ((eventData.e_hour! - now.getHours()) * 60 +
+                        eventData.e_minute! -
                         now.getMinutes()) /
-                        ((eventData.endsHour - eventData.startsHour) * 60 +
-                          eventData.endsMinute -
-                          eventData.startsMinute)) *
+                        ((eventData.e_hour! - eventData.s_hour!) * 60 +
+                          eventData.e_minute! -
+                          eventData.s_minute!)) *
                       100
                   )}%`
                 : `${Math.round(
                     (1 -
-                      ((eventData.actualEndsHour! - now.getHours()) * 60 +
-                        eventData.actualEndsMinute! -
+                      ((eventData.ae_hour! - now.getHours()) * 60 +
+                        eventData.ae_minute! -
                         now.getMinutes()) /
-                        ((eventData.actualEndsHour! - eventData.actualStartsHour) * 60 +
-                          eventData.actualEndsMinute! -
-                          eventData.actualStartsMinute!)) *
+                        ((eventData.ae_hour! - eventData.as_hour!) * 60 +
+                          eventData.ae_minute! -
+                          eventData.as_minute!)) *
                       100
                   )}%`}
         </p>
       </div>
-      {eventData.date !== '' && (
+      {eventData.date && (
         <div className="relative h-full w-[calc((87px*24)+87px)] overflow-hidden">
           <div
             onClick={handleShowDialog}
@@ -148,19 +150,14 @@ const EventComponent = ({
             style={{
               marginLeft: `${
                 40 +
-                87 *
-                  (eventData.actualStartsHour === null
-                    ? eventData.startsHour
-                    : eventData.actualStartsHour) +
+                87 * (eventData.as_hour === null ? eventData.s_hour! : eventData.as_hour!) +
                 Math.floor(
-                  ((eventData.actualStartsMinute === null
-                    ? eventData.startsMinute
-                    : eventData.actualStartsMinute) *
+                  ((eventData.as_minute === null ? eventData.s_minute! : eventData.as_minute!) *
                     87) /
                     60
                 )
               }px`,
-              width: `${87 * (eventData.endsHour - eventData.startsHour) + Math.floor(((eventData.endsMinute - eventData.startsMinute) / 60) * 87)}px`
+              width: `${87 * (eventData.e_hour! - eventData.s_hour!) + Math.floor(((eventData.e_minute! - eventData.s_minute!) / 60) * 87)}px`
             }}
           ></div>
         </div>

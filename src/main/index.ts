@@ -2,7 +2,6 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { readFileSync, writeFileSync } from 'fs'
 import sqlite3 from 'sqlite3'
 
 const db = new (sqlite3.verbose().Database)(join(__dirname, '../../resources/data.sqlite3'))
@@ -14,40 +13,20 @@ db.serialize(() => {
     "s_hour"	INTEGER,
     "s_minute"	INTEGER,
     "e_hour"	INTEGER,
+    "e_minute"	INTEGER,
     "as_hour"	INTEGER,
     "as_minute"	INTEGER,
-    "e_minute"	INTEGER,
+    "ae_hour" INTEGER,
+    "ae_minute" INTEGER,
     "date"	TEXT,
     "desc"	TEXT,
     "name"	TEXT,
     "group_name"	TEXT,
     PRIMARY KEY("id" AUTOINCREMENT)
   );`)
-  //   db.run(`
-  //   INSERT INTO tasks (duration, s_hour, s_minute, e_hour, as_hour, as_minute, e_minute, date, desc, name, group_name)
-  //   VALUES
-  //     (60, 9, 0, 10, 9, 0, 10, '27.04.2024', 'Dummy Task 1', 'Task 1', '123'),
-  //     (120, 10, 0, 12, 10, 0, 12, '27.04.2024', 'Dummy Task 2', 'Task 2', '123'),
-  //     (45, 12, 0, 12, 12, 0, 12, '27.04.2024', 'Dummy Task 3', 'Task 3', '123'),
-  //     (90, 14, 0, 15, 14, 0, 15, '27.04.2024', 'Dummy Task 4', 'Task 4', '123'),
-  //     (30, 16, 0, 16, 16, 0, 16, '27.04.2024', 'Dummy Task 5', 'Task 5', '123');
-  // `)
 })
-;(async (): Promise<void> => {
-  const res = await new Promise((res) => {
-    db.all(
-      'SELECT id, duration, s_hour, s_minute, e_hour, as_hour, as_minute, e_minute, date, desc, name FROM tasks',
-      (err, rows) => {
-        console.log(err, rows)
-
-        res(rows)
-      }
-    )
-  })
-})()
 
 function createWindow(): void {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
@@ -77,112 +56,45 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
-export type EventType = {
-  name: string
-  date: string
-  startsHour: number
-  startsMinute: number
-  endsHour: number
-  endsMinute: number
-  detail: string
-  actualStartsHour: number | null
-  actualStartsMinute: number | null
-}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
-  ipcMain.handle('save_events', async (_event, args: { payload: string }) => {
-    try {
-      writeFileSync(join(__dirname, '../../resources/events.json'), args.payload, {
-        encoding: 'utf8'
-      })
-      return { isSuccess: true }
-    } catch (err) {
-      console.log(err, args)
-      return { isSuccess: false }
-    }
-  })
-  ipcMain.handle('get_events', async () => {
-    try {
-      const fileContent = readFileSync(join(__dirname, '../../resources/events.json'), 'utf8')
-      let eventsData: EventType[] = []
-      try {
-        eventsData = JSON.parse(fileContent)
-      } catch (err) {
-        eventsData = []
-      }
-      return { data: eventsData, isSuccess: true }
-    } catch (err) {
-      console.log(err)
-      return { data: null, isSuccess: false }
-    }
-  })
-
-  ipcMain.handle('delete_event', async (_event, { eventData }: { eventData: EventType }) => {
-    try {
-      const fileContent = readFileSync(join(__dirname, '../../resources/events.json'), 'utf8')
-      const eventsData: EventType[] = JSON.parse(fileContent)
-
-      writeFileSync(
-        join(__dirname, '../../resources/events.json'),
-        JSON.stringify(
-          eventsData.filter(
-            (ev: EventType) =>
-              !(
-                ev.date === eventData.date &&
-                ev.name === eventData.name &&
-                ev.detail === eventData.detail &&
-                ev.startsHour === eventData.startsHour &&
-                ev.startsMinute === eventData.startsMinute
-              )
-          )
-        ),
-        {
-          encoding: 'utf8'
+  ipcMain.handle('db-query', async (_event, sqlQuery) => {
+    const res = await new Promise((res) => {
+      db.all(sqlQuery, (err, rows) => {
+        if (err) {
+          res([])
         }
-      )
-      return { isSuccess: true }
-    } catch (err) {
-      console.log(err, eventData)
-      return { isSuccess: false }
-    }
-  })
-  ipcMain.handle('start_event', async (_event, args: { eventData: EventType }) => {
-    try {
-      const fileContent = readFileSync(join(__dirname, '../../resources/events.json'), 'utf8')
-      const eventsData: EventType[] = JSON.parse(fileContent)
-      eventsData[
-        eventsData.findIndex(
-          (ev) =>
-            (ev.date === args.eventData.date || ev.date === '') &&
-            ev.name === args.eventData.name &&
-            ev.detail === args.eventData.detail &&
-            ev.startsHour === args.eventData.startsHour &&
-            ev.startsMinute === args.eventData.startsMinute
-        )
-      ] = args.eventData
-      writeFileSync(join(__dirname, '../../resources/events.json'), JSON.stringify(eventsData), {
-        encoding: 'utf8'
+
+        res(rows)
       })
-      return { isSuccess: true }
-    } catch (err) {
-      console.log(err, args)
-      return { isSuccess: false }
-    }
+    })
+
+    return res
   })
+
+  ipcMain.handle('db-exec', async (_event, sqlQuery) => {
+    const res = await new Promise((res) => {
+      db.exec(sqlQuery, (err) => {
+        if (err) {
+          res('bad')
+        }
+
+        res('good')
+      })
+    })
+
+    return res
+  })
+
   createWindow()
 
   app.on('activate', function () {
