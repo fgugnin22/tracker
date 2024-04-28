@@ -101,7 +101,7 @@ function App(): JSX.Element {
           </div>
 
           {isFormVisible ? (
-            <CreateEventForm />
+            <CreateEventForm action="create" key={'createform'} />
           ) : (
             <div className=" w-full flex flex-col gap-4 grow mt-1">
               <p className=" text-[20px]">

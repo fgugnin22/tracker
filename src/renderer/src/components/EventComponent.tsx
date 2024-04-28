@@ -47,7 +47,7 @@ const EventComponent = ({
     eventModified.s_minute ??= eventModified.as_minute
     eventModified.e_minute ??= eventModified.ae_minute
 
-    await dispatch(updateEvent({ eventData: eventModified }))
+    await dispatch(updateEvent(eventModified))
   }
 
   const actualStartsHour = Number(eventData.as_hour ?? eventData.s_hour)

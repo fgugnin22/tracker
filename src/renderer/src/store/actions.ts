@@ -84,7 +84,7 @@ export const addEvent = createAsyncThunk('add-event', async (event: EventType, t
 
 export const updateEvent = createAsyncThunk(
   'start-event',
-  async ({ eventData }: { eventData: EventType }, thunkAPI) => {
+  async (eventData: EventType, thunkAPI) => {
     const sql = `UPDATE tasks SET
       duration = ${eventData.duration ? `'${eventData.duration}'` : 'NULL'}, 
       s_hour = ${eventData.s_hour || eventData.s_hour === 0 ? `'${eventData.s_hour}'` : 'NULL'}, 
@@ -95,7 +95,7 @@ export const updateEvent = createAsyncThunk(
       as_minute = ${eventData.as_minute || eventData.as_minute === 0 ? `'${eventData.as_minute}'` : 'NULL'},  
       ae_hour = ${eventData.ae_hour || eventData.ae_hour === 0 ? `'${eventData.ae_hour}'` : 'NULL'},  
       ae_minute = ${eventData.ae_minute || eventData.ae_minute === 0 ? `'${eventData.ae_minute}'` : 'NULL'},  
-      date = ${eventData.date || eventData.date === '' ? `'${eventData.date}'` : 'NULL'}, 
+      date = ${eventData.date || eventData.date === '' ? `'${eventData.date}'` : "''"}, 
       desc = ${eventData.desc ? `'${eventData.desc}'` : 'NULL'}, 
       name = ${eventData.name ? `'${eventData.name}'` : 'NULL'}, 
       group_name = ${eventData.group_name ? `'${eventData.group_name}'` : 'NULL'}

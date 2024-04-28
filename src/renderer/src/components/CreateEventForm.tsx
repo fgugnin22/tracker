@@ -1,9 +1,15 @@
 import { useAppDispatch, useAppSelector } from '@renderer/store'
-import { addEvent } from '@renderer/store/actions'
+import { addEvent, closeModal, updateEvent } from '@renderer/store/actions'
 import { EventType } from '@renderer/types'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 
-const CreateEventForm: React.FC = (): ReactNode => {
+type CreateEventFormProps = {
+  action: 'create' | 'update'
+}
+
+const CreateEventForm: React.FC<CreateEventFormProps> = ({
+  action
+}: CreateEventFormProps): ReactNode => {
   const dispatch = useAppDispatch()
 
   const state = useAppSelector((state) => state.main)
@@ -13,10 +19,23 @@ const CreateEventForm: React.FC = (): ReactNode => {
   const [customError, setCustomError] = useState('')
 
   const date = new Date()
+  const [day, month, year] = state.modalState.details?.date?.split('.').map((v) => Number(v)) ?? [
+    date.getDate(),
+    date.getMonth(),
+    date.getFullYear()
+  ]
+
+  const formRef = useRef<HTMLFormElement>(null)
+
+  useEffect(() => {
+    setHasDate(state.modalState.details?.date ? true : false)
+    setHasDuration(state.modalState.details?.s_hour === null)
+  }, [state.modalState.details?.id])
 
   const handleSaveClick = async (): Promise<undefined> => {
-    const form = document.querySelector('form') as HTMLFormElement
-    if (!form.reportValidity()) {
+    const form = formRef.current
+
+    if (!form || !form.reportValidity()) {
       return
     }
 
@@ -54,7 +73,6 @@ const CreateEventForm: React.FC = (): ReactNode => {
       const [durationHour, durationMinute] = duration.split(':').map((v) => Number(v))
 
       newEvent.duration = durationHour * 60 + durationMinute
-      console.log(123)
     }
 
     if (
@@ -69,26 +87,83 @@ const CreateEventForm: React.FC = (): ReactNode => {
 
     console.log(newEvent)
 
-    await dispatch(addEvent(newEvent))
+    switch (action) {
+      case 'create':
+        await dispatch(addEvent(newEvent))
+        break
+      case 'update':
+        newEvent.id = state.modalState.details?.id ?? -1
+        await dispatch(updateEvent(newEvent))
+        break
+      default:
+        break
+    }
 
+    dispatch(closeModal())
     form.reset()
   }
+
+  const actualStartsHour = Number(
+    state.modalState.details?.as_hour ?? state.modalState.details?.s_hour
+  )
+  const actualEndsHour = Number(
+    state.modalState.details?.ae_hour ?? state.modalState.details?.e_hour
+  )
+  const actualStartsMinute = Number(
+    state.modalState.details?.as_minute ?? state.modalState.details?.s_minute
+  )
+  const actualEndsMinute = Number(
+    state.modalState.details?.ae_minute ?? state.modalState.details?.e_minute
+  )
+
+  const [formState] = useState({
+    name: action === 'update' ? state.modalState.details?.name : '',
+    date: `${year}-${month + 1 > 9 ? month + 1 : `0${month + 1}`}-${day > 9 ? day : `0${day}`}`,
+    starts:
+      action === 'update' &&
+      actualEndsHour + actualEndsMinute + actualStartsHour + actualStartsMinute !== 0
+        ? `${actualStartsHour > 9 ? actualStartsHour : `0${actualStartsHour}`}:${actualStartsMinute > 9 ? actualStartsMinute : `0${actualStartsMinute}`}`
+        : '',
+    ends:
+      action === 'update' &&
+      actualEndsHour + actualEndsMinute + actualStartsHour + actualStartsMinute !== 0
+        ? `${actualEndsHour > 9 ? actualEndsHour : `0${actualEndsHour}`}:${actualEndsMinute > 9 ? actualEndsMinute : `0${actualEndsMinute}`}`
+        : '',
+    selected: [
+      action === 'create',
+      (state.modalState.details?.s_hour === null ||
+        state.modalState.details?.s_hour === undefined) &&
+        action === 'update',
+      state.modalState.details?.s_hour !== null &&
+        state.modalState.details?.s_hour !== undefined &&
+        !date
+    ],
+    duration:
+      action === 'update'
+        ? `${Math.floor(Number(state.modalState.details?.duration) / 60) > 9 ? Math.floor(Number(state.modalState.details?.duration) / 60) : `0${Math.floor(Number(state.modalState.details?.duration) / 60)}`}:${Number(state.modalState.details?.duration) % 60 > 9 ? Number(state.modalState.details?.duration) % 60 : `0${Number(state.modalState.details?.duration) % 60}`}`
+        : '',
+    group: action === 'update' ? state.modalState.details?.group_name ?? '' : '',
+    desc: action === 'update' ? state.modalState.details?.desc ?? '' : ''
+  })
+
   return (
-    <form className="flex flex-col gap-2 w-full mt-4 text-lg font-medium grow">
+    <form ref={formRef} className="flex flex-col gap-2 w-full mt-4 text-lg font-medium grow">
       <div className="flex gap-2 justify-between items-start">
-        <label className="mt-[2px]" htmlFor="">
+        <label className="mt-[2px]" htmlFor="name">
           Название:{' '}
         </label>
         <input
-          required
+          defaultValue={formState.name}
+          id="name"
           name="name"
           className="border rounded-[10px] p-[5px] text-base"
           type="text"
           placeholder="Название"
+          required
         />
       </div>
       <div className="flex gap-2 justify-between items-center h-[37px]">
-        <label className="mb-1" htmlFor="">
+        <label className="mb-1" htmlFor="checked-checkbox">
           Дата:{' '}
         </label>
         <div className="mr-auto mb-1 flex items-center">
@@ -106,9 +181,9 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
         {hasDate && (
           <input
             required
-            defaultValue={`${date.getFullYear()}-${date.getMonth() + 1 > 9 ? date.getMonth() + 1 : `0${date.getMonth() + 1}`}-${date.getDate() > 9 ? date.getDate() : `0${date.getDate()}`}`}
+            defaultValue={formState.date}
             name="date"
-            className="border rounded-[10px] p-[5px] text-base"
+            className="border focus:border-black outline-none rounded-[10px] p-[5px] text-base"
             type="date"
           />
         )}
@@ -120,9 +195,10 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
               Начинается в:
             </label>
             <input
+              defaultValue={formState.starts}
               required
               name="starts"
-              className="border rounded-[10px] p-[5px] text-base"
+              className="border focus:border-black outline-none rounded-[10px] p-[5px] text-base"
               type="text"
               id="timeFrom"
               placeholder="09:00"
@@ -134,9 +210,10 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
               Заканчивается в:
             </label>
             <input
+              defaultValue={formState.ends}
               required
               name="ends"
-              className="border rounded-[10px] p-[5px] text-base"
+              className="border focus:border-black outline-none rounded-[10px] p-[5px] text-base"
               type="text"
               id="timeTo"
               placeholder="23:59"
@@ -149,7 +226,7 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
           <div key="fortharg" className="flex gap-2 justify-between items-start">
             <label htmlFor="whatever">Формат старта события</label>
             <select
-              className="border w-40 rounded-[10px] p-[5px] text-base"
+              className="border focus:border-black outline-none w-40 rounded-[10px] p-[5px] text-base"
               name="whatever"
               id="whatever"
               onChange={(e) => {
@@ -162,9 +239,13 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
               }}
               required
             >
-              <option value="" selected></option>
-              <option value="duration">Продолжительность</option>
-              <option value="startend">Фиксированное время начала и конца</option>
+              <option value="" selected={formState.selected[0]}></option>
+              <option value="duration" selected={formState.selected[1]}>
+                Продолжительность
+              </option>
+              <option value="startend" selected={formState.selected[2]}>
+                Фиксированное время начала и конца
+              </option>
             </select>
           </div>
           {hasDuration ? (
@@ -173,9 +254,10 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
                 Продолжительность:
               </label>
               <input
+                defaultValue={formState.duration}
                 required
                 name="duration"
-                className="border rounded-[10px] p-[5px] text-base"
+                className="border focus:border-black outline-none rounded-[10px] p-[5px] text-base"
                 type="text"
                 id="timeTo"
                 placeholder="02:30"
@@ -189,6 +271,7 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
                   Начинается в:
                 </label>
                 <input
+                  defaultValue={formState.starts}
                   required
                   name="starts"
                   className="border rounded-[10px] p-[5px] text-base"
@@ -203,6 +286,7 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
                   Заканчивается в:
                 </label>
                 <input
+                  defaultValue={formState.ends}
                   required
                   name="ends"
                   className="border rounded-[10px] p-[5px] text-base"
@@ -221,6 +305,7 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
           Название группы
         </label>
         <input
+          defaultValue={formState.group}
           required
           name="group_name"
           className="border rounded-[10px] p-[5px] text-base"
@@ -238,7 +323,12 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
         <label className="mt-[2px]" htmlFor="desc">
           Описание:
         </label>
-        <textarea name="desc" className="border rounded-[10px] p-[5px] text-base grow" id="desc" />
+        <textarea
+          defaultValue={formState.desc}
+          name="desc"
+          className="border rounded-[10px] p-[5px] text-base grow"
+          id="desc"
+        />
       </div>
       <button
         className=" bg-gray-500 hover:bg-slate-600 transition py-3 rounded-[10px] text-lg font-semibold text-white mt-auto"
