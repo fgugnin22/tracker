@@ -118,34 +118,55 @@ function App(): JSX.Element {
           )}
         </div>
       )}
-      <button
+      <div
         className={
-          'flex items-center min-h-full hover:bg-gray-200 transition z-[99] border-r border-black ' +
+          'flex flex-col min-h-full z-[99] border-r border-black ' +
           (showLeftPanel ? '' : '!left-0')
         }
-        onClick={() => setShowLeftPanel((p) => !p)}
       >
-        <svg
-          className={
-            'w-12 h-12 transition duration-300 ' + (showLeftPanel ? 'rotate-180' : 'rotate-0')
-          }
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
+        <button className="hover:bg-gray-200 flex items-center justify-center h-24 w-12">
+          <svg className="w-10 h-10" viewBox="0 0 32 32" fill="#000000">
+            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+            <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+            <g id="SVGRepo_iconCarrier">
+              <title>search</title> <desc>Created with Sketch Beta.</desc> <defs> </defs>
+              <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                <g id="Icon-Set" transform="translate(-256.000000, -1139.000000)" fill="#000000">
+                  <path
+                    d="M269.46,1163.45 C263.17,1163.45 258.071,1158.44 258.071,1152.25 C258.071,1146.06 263.17,1141.04 269.46,1141.04 C275.75,1141.04 280.85,1146.06 280.85,1152.25 C280.85,1158.44 275.75,1163.45 269.46,1163.45 L269.46,1163.45 Z M287.688,1169.25 L279.429,1161.12 C281.591,1158.77 282.92,1155.67 282.92,1152.25 C282.92,1144.93 276.894,1139 269.46,1139 C262.026,1139 256,1144.93 256,1152.25 C256,1159.56 262.026,1165.49 269.46,1165.49 C272.672,1165.49 275.618,1164.38 277.932,1162.53 L286.224,1170.69 C286.629,1171.09 287.284,1171.09 287.688,1170.69 C288.093,1170.3 288.093,1169.65 287.688,1169.25 L287.688,1169.25 Z"
+                    id="search"
+                  ></path>
+                </g>
+              </g>
+            </g>
+          </svg>
+        </button>
+        <button
+          className={'flex items-center h-24 hover:bg-gray-200 transition z-[99]'}
+          onClick={() => setShowLeftPanel((p) => !p)}
         >
-          <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-          <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
-          <g id="SVGRepo_iconCarrier">
-            <path
-              d="M6 12H18M18 12L13 7M18 12L13 17"
-              stroke="#000000"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            ></path>
-          </g>
-        </svg>
-      </button>
+          <svg
+            className={
+              'w-12 h-12 transition duration-300 ' + (showLeftPanel ? 'rotate-180' : 'rotate-0')
+            }
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+            <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+            <g id="SVGRepo_iconCarrier">
+              <path
+                d="M6 12H18M18 12L13 7M18 12L13 17"
+                stroke="#000000"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              ></path>
+            </g>
+          </svg>
+        </button>
+      </div>
 
       {state.modalEventsState.isOpen && <EventsModal />}
       <div
