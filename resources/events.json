@@ -1,1 +1,15 @@
-[{"as_hour":null,"as_minute":null,"ae_hour":null,"ae_minute":null,"name":"dfasdf","date":"28.04.2024","s_hour":12,"s_minute":12,"e_hour":13,"e_minute":13,"details":"fasdfas"}]
+[
+  {
+    "as_hour": null,
+    "as_minute": null,
+    "ae_hour": null,
+    "ae_minute": null,
+    "name": "dfasdf",
+    "date": "28.04.2024",
+    "s_hour": 12,
+    "s_minute": 12,
+    "e_hour": 13,
+    "e_minute": 13,
+    "details": "fasdfas"
+  }
+]

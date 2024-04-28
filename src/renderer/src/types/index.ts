@@ -9,7 +9,7 @@ export type EventExport = {
 
 export type EventType = {
   id: number
-  duration?: number | null
+  duration: number
   s_hour?: number | null
   s_minute?: number | null
   e_hour?: number | null

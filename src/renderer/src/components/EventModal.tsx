@@ -24,12 +24,14 @@ const EventModal: React.FC = () => {
         <span className="font-semibold">Название:</span> {state.modalState.details?.name}
       </p>
 
-      {state.modalState.details?.date !== '' ? (
+      {state.modalState.details?.s_hour !== null ? (
         <>
-          <p key={'fourthp'} className="text-xl max-w-72 break-words">
-            {' '}
-            <span className="font-semibold">Дата:</span> {state.modalState.details?.date}
-          </p>
+          {state.modalState.details?.date && (
+            <p key={'fourthp'} className="text-xl max-w-72 break-words">
+              {' '}
+              <span className="font-semibold">Дата:</span> {state.modalState.details?.date}
+            </p>
+          )}
           <p key={'firstp'} className="text-xl max-w-72 break-words">
             <span className="font-semibold">Начало:</span>{' '}
             {`${actualStartsHour > 9 ? actualStartsHour : `0${actualStartsHour}`}:${
@@ -46,9 +48,7 @@ const EventModal: React.FC = () => {
       ) : (
         <p key={'thirdp'} className="text-xl max-w-72 break-words">
           <span className="font-semibold">Продолжительность:</span>{' '}
-          {`${actualEndsHour > 9 ? actualEndsHour : `0${actualEndsHour}`}:${
-            actualEndsMinute > 9 ? actualEndsMinute : `0${actualEndsMinute}`
-          }`}
+          {`${Math.floor(state.modalState.details.duration / 60)}:${state.modalState.details.duration % 60}`}
         </p>
       )}
       <p className="text-xl max-w-[352px] break-words">

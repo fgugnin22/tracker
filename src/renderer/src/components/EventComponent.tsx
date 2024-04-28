@@ -19,23 +19,33 @@ const EventComponent = ({
     event.stopPropagation()
     const eventModified = { ...eventData }
     const now = new Date()
-    eventModified.as_hour = now.getHours()
-    eventModified.as_minute = now.getMinutes()
-    eventModified.ae_hour =
-      now.getHours() +
-      eventModified.e_hour! -
-      eventModified.s_hour! +
-      Math.floor((now.getMinutes() + (eventModified.e_minute! - eventModified.s_minute!)) / 60)
-    eventModified.ae_minute =
-      (now.getMinutes() +
-        (eventModified.e_hour! - eventModified.s_hour!) * 60 +
-        (eventModified.e_minute! - eventModified.s_minute!)) %
-      60
 
-    if (eventModified.date === '') {
+    if (
+      !eventModified.date &&
+      eventModified.s_hour !== null &&
+      eventModified.s_hour !== undefined
+    ) {
       eventModified.date = now.toLocaleDateString()
+    } else {
+      eventModified.as_hour = now.getHours()
+      eventModified.as_minute = now.getMinutes()
+
+      const d_hours = Math.floor(eventModified.duration / 60)
+      const d_minutes = eventModified.duration % 60
+
+      eventModified.ae_hour =
+        now.getHours() + d_hours + Math.floor((now.getMinutes() + d_minutes) / 60)
+      eventModified.ae_minute = (now.getMinutes() + d_minutes) % 60
+
+      if (eventModified.date === '') {
+        eventModified.date = now.toLocaleDateString()
+      }
     }
-    console.log(eventModified)
+
+    eventModified.s_hour ??= eventModified.as_hour
+    eventModified.e_hour ??= eventModified.ae_hour
+    eventModified.s_minute ??= eventModified.as_minute
+    eventModified.e_minute ??= eventModified.ae_minute
 
     await dispatch(updateEvent({ eventData: eventModified }))
   }
@@ -44,6 +54,7 @@ const EventComponent = ({
   const actualEndsHour = Number(eventData.ae_hour ?? eventData.e_hour)
   const actualStartsMinute = Number(eventData.as_minute ?? eventData.s_minute)
   const actualEndsMinute = Number(eventData.ae_minute ?? eventData.e_minute)
+
   const isEndsInPast =
     timeCoef !== 1 &&
     (timeCoef === -1 ||
@@ -97,8 +108,8 @@ const EventComponent = ({
             <span className="sr-only">Loading...</span>
           </div>
         ) : null}
-        <p className=" text-left ml-14 mr-auto font-medium text-3xl max-w-[220px] break-words">
-          {eventData.name.length > 30 ? eventData.name.slice(0, 30) + '...' : eventData.name}
+        <p className=" text-left ml-14 mr-auto font-medium text-[20px] leading-6 max-w-[220px] break-words">
+          {eventData.name.length > 50 ? eventData.name.slice(0, 50) + '...' : eventData.name}
         </p>
         <p
           className={
@@ -157,7 +168,7 @@ const EventComponent = ({
                     60
                 )
               }px`,
-              width: `${87 * (eventData.e_hour! - eventData.s_hour!) + Math.floor(((eventData.e_minute! - eventData.s_minute!) / 60) * 87)}px`
+              width: `${87 * (actualEndsHour - actualStartsHour) + Math.floor(((actualEndsMinute - actualStartsMinute) / 60) * 87)}px`
             }}
           ></div>
         </div>
