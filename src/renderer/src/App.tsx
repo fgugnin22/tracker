@@ -19,7 +19,7 @@ function App(): JSX.Element {
   const [now, setNow] = useState(new Date())
   const [showLeftPanel, setShowLeftPanel] = useState(false)
   const [showDP, setShowDP] = useState(false)
-
+  const [groupName, setGroupName] = useState('')
   const [isFormVisible, setIsFormVisible] = useState(false)
 
   const dateStr = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
@@ -59,6 +59,12 @@ function App(): JSX.Element {
   }
 
   const containerRef = useRef<HTMLElement>(null)
+
+  const groupNames = [...new Set(state.events.data.map((e) => e.group_name))]
+
+  const filteredByGroupName = state.events.data.filter(
+    (e) => e.group_name === groupName || !groupName
+  )
 
   return (
     <div className={' flex min-h-screen border border-t-black'}>
@@ -114,7 +120,7 @@ function App(): JSX.Element {
       )}
       <button
         className={
-          'flex items-center min-h-full hover:bg-gray-300 transition z-[99] border-r border-black ' +
+          'flex items-center min-h-full hover:bg-gray-200 transition z-[99] border-r border-black ' +
           (showLeftPanel ? '' : '!left-0')
         }
         onClick={() => setShowLeftPanel((p) => !p)}
@@ -140,26 +146,51 @@ function App(): JSX.Element {
           </g>
         </svg>
       </button>
-      <div
-        className={
-          'h-[105px] left-[561px] w-[353px] bg-white border-r border-r-black border-b border-b-black absolute z-10 flex items-center justify-center' +
-          (showLeftPanel ? '' : ' !left-[48px]')
-        }
-      >
-        <button
-          className="text-2xl font-medium hover:bg-slate-200 transiition duration-100 w-full h-full hover:underline"
-          onClick={() => dispatch(openEventsModal())}
-        >
-          События без даты
-        </button>
-      </div>
+
       {state.modalEventsState.isOpen && <EventsModal />}
       <div
         ref={containerRef as React.RefObject<HTMLDivElement>}
         className={'overflow-y-scroll max-h-[99.5vh] relative'}
       >
-        <div className="flex h-[105px]">
-          <div className="h-full flex items-center border-b border-b-black pr-[40px] relative left-[352px] z-0">
+        <div className="h-12 sticky left-0 flex items-center justify-start gap-2">
+          <button
+            className={
+              `w-[340px] text-lg h-9 rounded-lg border font-medium border-black
+            hover:bg-gray-200 transition ml-2 ` +
+              (groupName === '' ? 'bg-neutral hover:!bg-blue-500' : '')
+            }
+            key={'adsfmasd'}
+            onClick={() => setGroupName('')}
+          >
+            все
+          </button>
+          {groupNames.map((name) => (
+            <button
+              className={
+                `w-[340px] text-lg h-9 rounded-lg border font-medium border-black
+                hover:bg-blue-500 transition ` + (groupName === name ? 'bg-neutral' : '')
+              }
+              key={name + 'adsfmasd'}
+              onClick={() => setGroupName(name)}
+            >
+              {name.length > 30 ? name.slice(0, 30) + '...' : name}
+            </button>
+          ))}
+        </div>
+        <div
+          className={
+            'h-[105px] left-0 w-[352px] bg-white border-r border-t border-b border-black sticky z-10 flex items-center justify-center'
+          }
+        >
+          <button
+            className="text-2xl font-medium hover:bg-slate-200 transiition duration-100 w-full h-full hover:underline"
+            onClick={() => dispatch(openEventsModal())}
+          >
+            События без даты
+          </button>
+        </div>
+        <div className="flex h-[105px] absolute top-12 left-0">
+          <div className="h-full flex items-center border-t border-b border-black pr-[40px] relative left-[352px] z-0">
             {Array(25)
               .fill(1)
               .map((_v, i) => {
@@ -175,30 +206,28 @@ function App(): JSX.Element {
           </div>
         </div>
 
-        {state.events.isSuccess &&
-          state.events.data &&
-          state.events.data
-            .filter((ev) => {
-              return (
-                ev.date ===
-                `${date.getDate() < 9 ? `0${date.getDate()}` : date.getDate()}.${date.getMonth() < 9 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}.${date.getFullYear()}`
-              )
-            })
-            .map((ev, index) => {
-              return (
-                <EventComponent
-                  timeCoef={
-                    date.toDateString() === now.toDateString()
-                      ? 0
-                      : date.getTime() > now.getTime()
-                        ? 1
-                        : -1
-                  }
-                  eventData={ev}
-                  key={`event-${index}`}
-                />
-              )
-            })}
+        {filteredByGroupName
+          .filter((ev) => {
+            return (
+              ev.date ===
+              `${date.getDate() < 9 ? `0${date.getDate()}` : date.getDate()}.${date.getMonth() < 9 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}.${date.getFullYear()}`
+            )
+          })
+          .map((ev, index) => {
+            return (
+              <EventComponent
+                timeCoef={
+                  date.toDateString() === now.toDateString()
+                    ? 0
+                    : date.getTime() > now.getTime()
+                      ? 1
+                      : -1
+                }
+                eventData={ev}
+                key={`event-${index}`}
+              />
+            )
+          })}
 
         <EventModal />
         {date.toDateString() === now.toDateString() && (
