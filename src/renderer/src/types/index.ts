@@ -5,6 +5,7 @@ export type EventExport = {
   конец: string
   длительность: string
   описание: string | null
+  'процент выполнения': number
 }
 
 export type EventType = {

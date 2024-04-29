@@ -46,7 +46,8 @@ function App(): JSX.Element {
         { label: 'Начало', value: 'начало', format: '# "time"' },
         { label: 'Конец', value: 'конец', format: '# "time"' },
         { label: 'Длительность', value: 'длительность' },
-        { label: 'Описание', value: 'описание' }
+        { label: 'Описание', value: 'описание' },
+        { label: 'Процент выполнения', value: 'процент выполнения', format: '#"%"' }
       ],
       content: transformEvents(state.events.data)
     }
@@ -171,7 +172,7 @@ function App(): JSX.Element {
       {state.modalEventsState.isOpen && <EventsModal />}
       <div
         ref={containerRef as React.RefObject<HTMLDivElement>}
-        className={'overflow-y-scroll max-h-[99.5vh] relative'}
+        className={'overflow-y-scroll max-h-[99.5vh] relative w-full'}
       >
         <div className="h-12 sticky left-0 flex items-center justify-start gap-2">
           <button
