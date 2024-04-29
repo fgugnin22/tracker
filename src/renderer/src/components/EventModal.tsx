@@ -26,7 +26,7 @@ const EventModal: React.FC = () => {
     <dialog
       open={state.modalState.isOpen}
       className="w-[500px] h-[600px] px-6 pt-6 pb-3 rounded-[10px] shadow-md shadow-gray-100
- fixed left-[890px] top-[120px] ml-1 mt-1 z-50 bg-white border border-black open:flex flex-col gap-2"
+ fixed left-[890px] top-[120px] ml-1 mt-1 z-50 bg-white border border-black open:flex flex-col gap-2 z-[102]"
     >
       {isFormOpen ? (
         <>

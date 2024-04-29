@@ -9,6 +9,7 @@ import CreateEventForm from './components/CreateEventForm'
 import { transformEvents } from './util/transformEvents'
 import { datePickOptions, months } from './constants'
 import EventModal from './components/EventModal'
+import SearchModal from './components/SearchModal'
 
 function App(): JSX.Element {
   const dispatch = useAppDispatch()
@@ -21,6 +22,7 @@ function App(): JSX.Element {
   const [showDP, setShowDP] = useState(false)
   const [groupName, setGroupName] = useState('')
   const [isFormVisible, setIsFormVisible] = useState(false)
+  const [isSearchModalVisible, setIsSearchModalVisible] = useState(false)
 
   const dateStr = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
 
@@ -69,6 +71,7 @@ function App(): JSX.Element {
 
   return (
     <div className={' flex min-h-screen border border-t-black'}>
+      {isSearchModalVisible && <SearchModal setState={setIsSearchModalVisible} />}
       {showLeftPanel && (
         <div
           className={`min-w-[512px] relative max-w-[512px] border border-r-black flex flex-col items-start justify-start py-12 px-10 transition `}
@@ -125,7 +128,10 @@ function App(): JSX.Element {
           (showLeftPanel ? '' : '!left-0')
         }
       >
-        <button className="hover:bg-gray-200 flex items-center justify-center h-24 w-12">
+        <button
+          onClick={() => setIsSearchModalVisible((p) => !p)}
+          className="hover:bg-gray-200 flex items-center justify-center h-24 w-12"
+        >
           <svg className="w-10 h-10" viewBox="0 0 32 32" fill="#000000">
             <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
             <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
