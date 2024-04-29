@@ -100,7 +100,7 @@ function App(): JSX.Element {
               className=" -mt-1 bg-blue-400 hover:bg-blue-500 transition py-3 grow rounded-[10px] text-lg font-semibold text-white"
               onClick={() => setIsFormVisible((p) => !p)}
             >
-              {isFormVisible ? 'Скрыть' : '+Добавить'}
+              {isFormVisible ? 'Скрыть форму' : '+Добавить событие'}
             </button>
           </div>
 
