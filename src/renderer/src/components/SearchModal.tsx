@@ -34,7 +34,8 @@ const SearchModal: React.FC<SearchModalProps> = (props: SearchModalProps) => {
           <EventComponent
             timeCoef={0}
             key={e.id + 'adsfasfd' + e.duration}
-            eventData={{ ...e, date: '' }}
+            eventData={e}
+            inModal={true}
           />
         )
       })}

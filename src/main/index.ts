@@ -4,7 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import sqlite3 from 'sqlite3'
 
-const db = new (sqlite3.verbose().Database)(join(__dirname, '../../resources/data.sqlite3'))
+const db = new (sqlite3.verbose().Database)('./data.sqlite3')
 
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS "tasks" (

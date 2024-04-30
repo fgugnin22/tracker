@@ -5,10 +5,12 @@ import { EventType } from '@renderer/types'
 
 const EventComponent = ({
   eventData,
-  timeCoef
+  timeCoef,
+  inModal
 }: {
   eventData: EventType
   timeCoef: -1 | 0 | 1
+  inModal: boolean
 }): ReactNode => {
   const dispatch = useAppDispatch()
   const state = useAppSelector((state) => state.main)
@@ -73,7 +75,7 @@ const EventComponent = ({
 
   return (
     <div
-      className={` h-[110px] w-fit flex border-b border-b-black relative ${eventData.date === '' ? 'border-l border-l-black first-of-type:border-t first-of-type:border-t-black' : ''}`}
+      className={` h-[110px] w-fit flex border-b border-b-black relative ${eventData.date === '' || inModal ? 'border-l border-l-black first-of-type:border-t first-of-type:border-t-black' : ''}`}
     >
       <div
         onClick={handleShowDialog}
@@ -82,9 +84,12 @@ const EventComponent = ({
       >
         {(isStartInFuture && timeCoef === 0 && !state.eventState.loading) ||
         eventData.date === '' ? (
-          <button onClick={handleStartButton} className="absolute left-5 top-[38px]">
-            <svg width="20" height="33" viewBox="0 0 20 33" fill="none">
-              <path d="M0 33V0L19.5 16.5L0 33Z" fill="#4E4E4E" />
+          <button
+            onClick={handleStartButton}
+            className="absolute left-5 top-[38px] fill-gray-500 hover:fill-blue-600 transition scale-110 hover:scale-125"
+          >
+            <svg width="20" height="33" viewBox="0 0 20 33">
+              <path d="M0 33V0L19.5 16.5L0 33Z" />
             </svg>
           </button>
         ) : state.eventState.loading ? (
@@ -111,42 +116,44 @@ const EventComponent = ({
         <p className=" text-left ml-14 mr-auto font-medium text-[20px] leading-6 max-w-[220px] break-words">
           {eventData.name.length > 50 ? eventData.name.slice(0, 50) + '...' : eventData.name}
         </p>
-        <p
-          className={
-            `text-right ml-auto mr-[9px] font-bold text-xl ` +
-            ((isEndsInPast && ' text-main') ||
-              (isStartInFuture && ' text-upcoming') ||
-              ' text-neutral')
-          }
-        >
-          {isEndsInPast
-            ? '100%'
-            : isStartInFuture
-              ? '0%'
-              : eventData.as_hour === null
-                ? `${Math.round(
-                    (1 -
-                      ((eventData.e_hour! - now.getHours()) * 60 +
-                        eventData.e_minute! -
-                        now.getMinutes()) /
-                        ((eventData.e_hour! - eventData.s_hour!) * 60 +
+        {!inModal && (
+          <p
+            className={
+              `text-right ml-auto mr-[9px] font-bold text-xl ` +
+              ((isEndsInPast && ' text-main') ||
+                (isStartInFuture && ' text-upcoming') ||
+                ' text-neutral')
+            }
+          >
+            {isEndsInPast
+              ? '100%'
+              : isStartInFuture
+                ? '0%'
+                : eventData.as_hour === null
+                  ? `${Math.round(
+                      (1 -
+                        ((eventData.e_hour! - now.getHours()) * 60 +
                           eventData.e_minute! -
-                          eventData.s_minute!)) *
-                      100
-                  )}%`
-                : `${Math.round(
-                    (1 -
-                      ((eventData.ae_hour! - now.getHours()) * 60 +
-                        eventData.ae_minute! -
-                        now.getMinutes()) /
-                        ((eventData.ae_hour! - eventData.as_hour!) * 60 +
+                          now.getMinutes()) /
+                          ((eventData.e_hour! - eventData.s_hour!) * 60 +
+                            eventData.e_minute! -
+                            eventData.s_minute!)) *
+                        100
+                    )}%`
+                  : `${Math.round(
+                      (1 -
+                        ((eventData.ae_hour! - now.getHours()) * 60 +
                           eventData.ae_minute! -
-                          eventData.as_minute!)) *
-                      100
-                  )}%`}
-        </p>
+                          now.getMinutes()) /
+                          ((eventData.ae_hour! - eventData.as_hour!) * 60 +
+                            eventData.ae_minute! -
+                            eventData.as_minute!)) *
+                        100
+                    )}%`}
+          </p>
+        )}
       </div>
-      {eventData.date && (
+      {eventData.date && !inModal && (
         <div className="relative h-full w-[calc((87px*24)+87px)] overflow-hidden">
           <div
             onClick={handleShowDialog}

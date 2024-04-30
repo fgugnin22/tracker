@@ -19,6 +19,7 @@ const EventsModal = (): ReactNode => {
         className="p-1 text-lg border-2 border-gray-400 w-[352px] rounded-xl mb-4 focus:border-blue-600 outline-none"
         type="text"
         onChange={(e) => setQuery(e.target.value)}
+        placeholder="Поиск по событиям без даты"
       />
       <button
         onClick={() => dispatch(closeEventsModal())}
@@ -30,7 +31,7 @@ const EventsModal = (): ReactNode => {
         {events
           .filter((e) => e.name.toLowerCase().includes(query.toLowerCase()))
           .map((e) => (
-            <EventComponent key={JSON.stringify(e)} eventData={e} timeCoef={1} />
+            <EventComponent inModal={true} key={JSON.stringify(e)} eventData={e} timeCoef={1} />
           ))}
       </div>
     </div>

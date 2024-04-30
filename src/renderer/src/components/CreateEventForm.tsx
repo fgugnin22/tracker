@@ -118,7 +118,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({
 
   const [formState] = useState({
     name: action === 'update' ? state.modalState.details?.name : '',
-    date: `${year}-${month + 1 > 9 ? month + 1 : `0${month + 1}`}-${day > 9 ? day : `0${day}`}`,
+    date: `${year}-${month > 9 ? month : `0${month}`}-${day > 9 ? day : `0${day}`}`,
     starts:
       action === 'update' &&
       actualEndsHour + actualEndsMinute + actualStartsHour + actualStartsMinute !== 0

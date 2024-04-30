@@ -10,6 +10,7 @@ import { transformEvents } from './util/transformEvents'
 import { datePickOptions, months } from './constants'
 import EventModal from './components/EventModal'
 import SearchModal from './components/SearchModal'
+import { importEvents } from './util/importEvents'
 
 function App(): JSX.Element {
   const dispatch = useAppDispatch()
@@ -69,6 +70,17 @@ function App(): JSX.Element {
     (e) => e.group_name === groupName || !groupName
   )
 
+  const handleImportButtonClick = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const input = e.target
+    if (!input.files || !input.files[0]) {
+      return
+    }
+
+    const fileName = input.files[0]
+
+    importEvents(fileName, dispatch)
+  }
+
   return (
     <div className={' flex min-h-screen border border-t-black'}>
       {isSearchModalVisible && <SearchModal setState={setIsSearchModalVisible} />}
@@ -112,8 +124,21 @@ function App(): JSX.Element {
                 Нажатие на кнопку рядом с событием в таблице запускает событие мгновенно с текущим
                 временем, не меняя его продолжительность!
               </p>
+              <label
+                htmlFor="import"
+                className=" bg-zinc-500 hover:bg-zinc-600 transition py-3 w-full rounded-[10px] text-lg font-semibold text-white mt-auto text-center cursor-pointer"
+              >
+                <span>Импорт</span>
+                <input
+                  hidden
+                  onChange={handleImportButtonClick}
+                  type="file"
+                  name="import"
+                  id="import"
+                />
+              </label>
               <button
-                className=" bg-green-600 hover:bg-green-700 transition py-3 w-full rounded-[10px] text-lg font-semibold text-white mt-auto"
+                className=" bg-green-600 hover:bg-green-700 transition py-3 w-full rounded-[10px] text-lg font-semibold text-white"
                 onClick={handleExportButtonClick}
               >
                 Экспорт
@@ -253,6 +278,7 @@ function App(): JSX.Element {
                 }
                 eventData={ev}
                 key={`event-${index}`}
+                inModal={false}
               />
             )
           })}

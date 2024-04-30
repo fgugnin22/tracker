@@ -27,6 +27,7 @@
     "@reduxjs/toolkit": "^2.2.1",
     "json-as-xlsx": "^2.5.6",
     "react-redux": "^9.1.0",
+    "read-excel-file": "^5.7.1",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
