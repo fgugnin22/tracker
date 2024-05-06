@@ -221,12 +221,14 @@ function App(): JSX.Element {
             <button
               className={
                 `w-[340px] text-lg h-9 rounded-lg border font-medium border-black
-                hover:bg-blue-500 transition ` + (groupName === name ? 'bg-neutral' : '')
+                hover:bg-blue-500 transition-all whitespace-nowrap px-4
+                 text-ellipsis overflow-clip hover:w-[650px] duration-500 ` +
+                (groupName === name ? 'bg-neutral' : '')
               }
               key={name + 'adsfmasd'}
               onClick={() => setGroupName(name)}
             >
-              {name.length > 30 ? name.slice(0, 30) + '...' : name}
+              {name}
             </button>
           ))}
         </div>

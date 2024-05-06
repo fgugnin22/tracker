@@ -12,6 +12,8 @@ An Electron application with React and TypeScript
 
 ```bash
 $ npm install
+$ npm install sqlite3 @electron/rebuild
+$ ./node_modules/.bin/electron-rebuild -f -w sqlite3
 ```
 
 ### Development
