@@ -48,7 +48,8 @@ export const transformEvents = (events: EventType[]): EventExport[] => {
       конец: ev.ae_hour !== null ? `${ev.ae_hour}:${ev.ae_minute}` : `${ev.e_hour}:${ev.e_minute}`,
       длительность: `${Math.floor(durationInMinutes / 60)} часов, ${durationInMinutes % 60} минут`,
       описание: ev.desc ?? '',
-      'процент выполнения': percent
+      'процент выполнения': isNaN(percent) ? '' : percent,
+      группа: ev.group_name
     }
     return evExport
   })

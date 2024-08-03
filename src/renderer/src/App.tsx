@@ -50,7 +50,8 @@ function App(): JSX.Element {
         { label: 'Конец', value: 'конец', format: '# "time"' },
         { label: 'Длительность', value: 'длительность' },
         { label: 'Описание', value: 'описание' },
-        { label: 'Процент выполнения', value: 'процент выполнения', format: '#"%"' }
+        { label: 'Процент выполнения', value: 'процент выполнения', format: '#"%"' },
+        { label: 'Группа', value: 'группа' }
       ],
       content: transformEvents(state.events.data)
     }
