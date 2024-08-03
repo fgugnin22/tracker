@@ -306,7 +306,6 @@ dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700
         </label>
         <input
           defaultValue={formState.group}
-          required
           name="group_name"
           className="border rounded-[10px] p-[5px] text-base"
           type="text"

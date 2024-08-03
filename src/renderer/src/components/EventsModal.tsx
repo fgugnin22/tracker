@@ -9,6 +9,12 @@ const EventsModal = (): ReactNode => {
   const events = useAppSelector((state) => state.main.events.data).filter((event) => !event.date)
 
   const [query, setQuery] = useState('')
+  const [groupQuery, setGroupQuery] = useState('')
+  const groupNames = [...new Set(events.map((e) => e.group_name))].filter((name) => !!name)
+
+  const eventsToRender = events
+    .filter((e) => !groupQuery || e.group_name === groupQuery)
+    .filter((e) => e.name.toLowerCase().includes(query.toLowerCase()))
 
   return (
     <div
@@ -28,11 +34,26 @@ const EventsModal = (): ReactNode => {
         <span className="rotate-45">+</span>
       </button>
       <div>
-        {events
-          .filter((e) => e.name.toLowerCase().includes(query.toLowerCase()))
-          .map((e) => (
-            <EventComponent inModal={true} key={JSON.stringify(e)} eventData={e} timeCoef={1} />
+        <div className="flex flex-col items-center gap-1 mb-2 leading-snug">
+          <button
+            onClick={() => setGroupQuery('')}
+            className="border border-black min-h-8 w-[353px] hover:bg-slate-200 transition transition-100"
+            >
+            все
+          </button>
+          {groupNames.map((groupName) => (
+            <button
+              onClick={() => setGroupQuery(groupName)}
+              className="border border-black min-h-8 w-[353px] hover:bg-slate-200 transition transition-100"
+            >
+              {groupName}
+            </button>
           ))}
+        </div>
+        {eventsToRender?.length ? <div className="w-full bg-black h-[2px]"></div> : null}
+        {eventsToRender.map((e) => (
+          <EventComponent inModal={true} key={JSON.stringify(e)} eventData={e} timeCoef={1} />
+        ))}
       </div>
     </div>
   )

@@ -66,6 +66,9 @@ const EventModal: React.FC = () => {
               {`${Math.floor(Number(state.modalState.details?.duration) / 60) > 9 ? Math.floor(Number(state.modalState.details?.duration) / 60) : `0${Math.floor(Number(state.modalState.details?.duration) / 60)}`}:${Number(state.modalState.details?.duration) % 60 > 9 ? Number(state.modalState.details?.duration) % 60 : `0${Number(state.modalState.details?.duration) % 60}`}`}
             </p>
           )}
+          {state.modalState.details?.group_name && <p className="text-xl max-w-[352px] break-words">
+            <span className="font-semibold">Группа:</span> {state.modalState.details?.group_name}
+          </p>}
           <p className="text-xl max-w-[352px] break-words">
             <span className="font-semibold">Описание:</span> {state.modalState.details?.desc}
           </p>
